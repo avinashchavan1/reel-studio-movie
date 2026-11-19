@@ -1,0 +1,163 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="../../../engine/engine.js"></script>
+<script src="../../../engine/engine2.js"></script>
+<script src="../../../engine/scenes2.js"></script>
+<script>
+// Eight 2D animation techniques of the same moment: Ishita, Vihaan and her phone's hotspot on campus.
+// window.renderStyle(n, t) draws style n (sampler number) at local time t (0..3 s) and returns a JPEG data URL.
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const off = document.createElement('canvas'); off.width = 1080; off.height = 1920; const octx = off.getContext('2d');
+const small = document.createElement('canvas'); const sctx = small.getContext('2d');
+const realFs2 = fs2;
+const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+window.boot = async () => {
+  for (const [f, u, w] of [['Fredoka', '../../../fonts/Fredoka-700.woff2', 700], ['Title', '../style-sampler/src/assets/title.woff2', 600]]) {
+    try { document.fonts.add(await new FontFace(f, `url(${u})`, { weight: String(w) }).load()); } catch (e) { console.warn(e); }
+  }
+  window.READY = true;
+};
+
+// ---------- shared pieces ----------
+function couple(c, t, o = {}) {
+  const wave = t > .9 && t < 2.4;
+  hero(c, o.ix ?? 380, o.y ?? 1360, o.s ?? 1.0, CAST2.ishita, { t, emo: o.emoI || 'happy', look: .8, phase: 0 });
+  hero(c, o.vx ?? 700, o.y ?? 1360, (o.s ?? 1.0) * 1.0, CAST2.vihaan, { t, emo: o.emoV || 'happy', look: -.8, phase: 1.3, pose: wave ? 'wave' : undefined });
+}
+function phoneGlow(c, x, y, t, s = 1, col = '#ff5d8f') {
+  c.save(); c.translate(x, y); c.scale(s, s);
+  rr(c, -34, -60, 68, 120, 12); c.fillStyle = '#27272a'; c.fill(); c.fillStyle = '#9fd3ff'; c.fillRect(-28, -52, 56, 104);
+  const lit = Math.floor((t * 2.6) % 4); c.lineCap = 'round';
+  [12, 22, 32].forEach((r, i) => { c.beginPath(); c.arc(0, 8, r, -Math.PI * .78, -Math.PI * .22); c.lineWidth = 6; c.strokeStyle = i < lit ? col : 'rgba(255,255,255,.4)'; c.stroke(); });
+  c.beginPath(); c.arc(0, 8, 4, 0, 7); c.fillStyle = col; c.fill(); c.restore();
+}
+function label(n, name, note, k = 1, light = true) {
+  ctx.save(); ctx.globalAlpha = .55 * k; ctx.fillStyle = '#120f1f';
+  ctx.beginPath(); ctx.roundRect(180, 150, 720, 330, 40); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(70, 1590, 940, 110, 30); ctx.fill(); ctx.globalAlpha = k;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 24;
+  ctx.font = '600 110px Title'; ctx.fillStyle = '#ffc93c'; ctx.fillText(`${n} / 10`, 540, 230);
+  ctx.font = '600 100px Title'; ctx.fillStyle = '#fffaf0'; ctx.fillText(name, 540, 394);
+  ctx.font = '500 40px Title'; ctx.fillText(note, 540, 1645); ctx.restore();
+}
+
+// ---------- the styles ----------
+const STYLES = {
+  2: { name: '2D vector cartoon', note: 'Flat 2D drawing, smooth motion, lip-sync', draw(t) {
+    sceneCollege(ctx, t, 'SILICON VALLEY INSTITUTE OF TECHNOLOGY');
+    couple(ctx, t); phoneGlow(ctx, 540, 1060 + Math.sin(t * 2.4) * 8, t, .9);
+  } },
+  3: { name: 'Anime', note: 'Dramatic close-up, speed lines, sparkles', draw(t) {
+    const g = ctx.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, '#ff9ec8'); g.addColorStop(1, '#8b5cf6'); ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.save(); ctx.translate(540, 960); ctx.rotate(t * .4);
+    for (let i = 0; i < 70; i++) { const a = i / 70 * Math.PI * 2 + hash(i) * .05, r0 = 420 + hash(i + 9) * 200; ctx.beginPath(); ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0); ctx.lineTo(Math.cos(a) * 1600, Math.sin(a) * 1600); ctx.lineWidth = 2 + hash(i + 3) * 8; ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.stroke(); }
+    ctx.restore();
+    const punch = t > 1.2 ? 1 + .12 * ease.out(prog(t, 1.2, .25)) : 1, shake = t > 1.2 && t < 1.5 ? (hash(Math.floor(t * 24)) - .5) * 24 : 0;
+    ctx.save(); ctx.translate(540 + shake, 1000); ctx.scale(punch, punch); ctx.translate(-540, -1000);
+    hero(ctx, 540, 2560, 2.7, CAST2.ishita, { t, emo: t > 1.2 ? 'shocked' : 'blush', look: t > 1.2 ? .9 : 0, pose: 'idle' });
+    ctx.restore();
+    for (let i = 0; i < 14; i++) { const x = hash(i) * 1080, y = 520 + hash(i + 5) * 1100, k = Math.abs(Math.sin(t * 3 + i)); ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.fillStyle = '#fff'; ctx.beginPath(); for (let j = 0; j < 8; j++) { const r = j % 2 ? 6 : 26, a = j * Math.PI / 4; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill(); ctx.restore(); }
+    if (t > 1.2) { bigText(ctx, '!!', 860, 760, 220, ease.back(prog(t, 1.2, .3)), '#fff', '#ff2d6f'); phoneGlow(ctx, 230, 1180, t, 1.6); }
+  } },
+  4: { name: 'Pixel art (8-bit)', note: 'Low-res pixels, 16 colours, choppy 8 fps', draw(t) {
+    const ts = Math.floor(t * 8) / 8; // 8 fps
+    octx.save(); octx.clearRect(0, 0, 1080, 1920);
+    const save = window.ctx; sceneTown.call(null, octx, ts); octx.restore();
+    hero(octx, 400 + Math.floor(ts * 4) * 8, 1360, 1.0, CAST2.ishita, { t: ts, emo: 'happy', look: .8, walking: ts < 1.5 });
+    hero(octx, 720, 1360, 1.0, CAST2.vihaan, { t: ts, emo: 'happy', look: -.8, pose: ts > .9 && ts < 2.4 ? 'wave' : undefined });
+    phoneGlow(octx, 560, 1080, ts, 1.0);
+    const P = 8; small.width = 1080 / P; small.height = 1920 / P;
+    sctx.imageSmoothingEnabled = true; sctx.drawImage(off, 0, 0, small.width, small.height);
+    const img = sctx.getImageData(0, 0, small.width, small.height), d = img.data;
+    const PAL = [[20,12,28],[68,36,52],[48,52,109],[78,74,78],[133,76,48],[52,101,36],[208,70,72],[117,113,97],[89,125,206],[210,125,44],[133,149,161],[109,170,44],[210,170,153],[109,194,202],[218,212,94],[222,238,214]];
+    for (let i = 0; i < d.length; i += 4) { let best = 0, bd = 1e9; for (let k = 0; k < PAL.length; k++) { const p = PAL[k], dd = (d[i] - p[0]) ** 2 + (d[i + 1] - p[1]) ** 2 + (d[i + 2] - p[2]) ** 2; if (dd < bd) { bd = dd; best = k; } } d[i] = PAL[best][0]; d[i + 1] = PAL[best][1]; d[i + 2] = PAL[best][2]; }
+    sctx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = false; ctx.drawImage(small, 0, 0, 1080, 1920); ctx.imageSmoothingEnabled = true;
+    if (ts > 1.5) { ctx.fillStyle = '#140c1c'; ctx.fillRect(250, 1460, 580, 90); ctx.fillStyle = '#deeed6'; ctx.font = '700 44px Fredoka'; ctx.textAlign = 'center'; ctx.fillText('HOTSPOT: ON  ▶', 540, 1505); }
+  } },
+  5: { name: 'Shadow puppet', note: 'Silhouettes on a lit screen, puppet rods', draw(t) {
+    const ts = Math.floor(t * 12) / 12;
+    const g = ctx.createRadialGradient(540, 900, 100, 540, 900, 1100); g.addColorStop(0, '#ffe2a0'); g.addColorStop(.6, '#f08a3c'); g.addColorStop(1, '#7a1f2b'); ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1920);
+    octx.clearRect(0, 0, 1080, 1920);
+    // silhouette scenery: temple dome, palm, lattice border
+    octx.fillStyle = '#000'; octx.beginPath(); octx.arc(860, 1120, 150, Math.PI, 0); octx.fill(); octx.fillRect(700, 1120, 320, 260); octx.fillRect(850, 900, 20, 80);
+    octx.beginPath(); octx.moveTo(130, 1380); octx.quadraticCurveTo(150, 1100, 170, 900); octx.lineTo(185, 900); octx.quadraticCurveTo(170, 1100, 160, 1380); octx.fill();
+    for (let i = 0; i < 6; i++) { octx.save(); octx.translate(178, 900); octx.rotate(-1.4 + i * .55); octx.beginPath(); octx.ellipse(70, 0, 80, 16, 0, 0, 7); octx.fill(); octx.restore(); }
+    const sway = Math.sin(ts * 5) * .04;
+    octx.save(); octx.translate(380, 1380); octx.rotate(sway); hero(octx, 0, 0, 1.0, CAST2.ishita, { t: ts, emo: 'happy' }); octx.restore();
+    octx.save(); octx.translate(700, 1380); octx.rotate(-sway); hero(octx, 0, 0, 1.0, CAST2.vihaan, { t: ts, emo: 'happy', pose: ts > .9 && ts < 2.4 ? 'wave' : undefined }); octx.restore();
+    octx.globalCompositeOperation = 'source-in'; octx.fillStyle = '#0d0605'; octx.fillRect(0, 0, 1080, 1920); octx.globalCompositeOperation = 'source-over';
+    // rods
+    octx.strokeStyle = '#0d0605'; octx.lineWidth = 6; [[380, 1210], [700, 1210], [460, 1110], [780, 1000]].forEach(([x, y]) => { octx.beginPath(); octx.moveTo(x, y); octx.lineTo(x + 30, 1920); octx.stroke(); });
+    ctx.drawImage(off, 0, 0);
+    // the phone is the only light
+    const k = .6 + .4 * Math.abs(Math.sin(t * 3)); ctx.save(); ctx.globalCompositeOperation = 'lighter'; const lg = ctx.createRadialGradient(540, 1080, 0, 540, 1080, 120); lg.addColorStop(0, `rgba(255,240,200,${k})`); lg.addColorStop(1, 'rgba(255,200,120,0)'); ctx.fillStyle = lg; ctx.fillRect(400, 940, 280, 280); ctx.restore();
+    ctx.strokeStyle = '#3b0d12'; ctx.lineWidth = 40; ctx.strokeRect(20, 20, 1040, 1880);
+  } },
+  6: { name: 'Whiteboard sketch', note: 'Lines draw themselves, wobbly marker', draw(t) {
+    ctx.fillStyle = '#fbfbf6'; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.strokeStyle = 'rgba(80,120,200,.08)'; ctx.lineWidth = 2; for (let y = 0; y < 1920; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1080, y); ctx.stroke(); }
+    const fb = Math.floor(t * 8); const jx = (hash(fb) - .5) * 4, jy = (hash(fb + 50) - .5) * 4; // boiling lines
+    const reveal = ease.io(prog(t, 0, 1.9));
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1080, 520 + reveal * 1100); ctx.clip(); ctx.translate(jx, jy);
+    window.fs2 = (c, fill, lw = 4) => { c.fillStyle = '#ffffff'; c.fill(); c.lineWidth = lw * 1.25; c.strokeStyle = '#1f2937'; c.lineJoin = 'round'; c.stroke(); };
+    ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 5; ctx.strokeRect(120, 820, 840, 420); ctx.beginPath(); ctx.moveTo(100, 830); ctx.lineTo(540, 640); ctx.lineTo(980, 830); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, 1390); ctx.lineTo(1080, 1390); ctx.stroke();
+    couple(ctx, t, { emoI: 'happy', emoV: 'happy' });
+    window.fs2 = realFs2;
+    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 6; [14, 26, 38].forEach(r => { ctx.beginPath(); ctx.arc(540, 1080, r, -Math.PI * .78, -Math.PI * .22); ctx.stroke(); });
+    ctx.restore();
+    if (reveal < 1) { const y = 520 + reveal * 1100, x = 540 + Math.sin(t * 9) * 360; ctx.save(); ctx.translate(x, y); ctx.rotate(-.6); rr(ctx, -16, -120, 32, 130, 8); ctx.fillStyle = '#2563eb'; ctx.fill(); ctx.fillStyle = '#111'; ctx.fillRect(-16, 0, 32, 18); ctx.restore(); }
+    if (t > 2) { ctx.fillStyle = '#1f2937'; ctx.font = '700 64px Fredoka'; ctx.textAlign = 'center'; ctx.globalAlpha = prog(t, 2, .4); ctx.fillText('ek hotspot...', 540 + jx, 1500 + jy); ctx.globalAlpha = 1; }
+  } },
+  7: { name: 'Comic book', note: 'Panels, halftone dots, sound words', draw(t) {
+    ctx.fillStyle = '#fffdf5'; ctx.fillRect(0, 0, 1080, 1920);
+    const panel = (x, y, w, h, rot, k, bg, fn) => { if (k <= 0) return; ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot); ctx.scale(ease.back(k), ease.back(k)); ctx.translate(-w / 2, -h / 2);
+      ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.save(); ctx.clip(); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(0,0,0,.12)'; for (let yy = 0; yy < h; yy += 18) for (let xx = (yy / 18) % 2 ? 9 : 0; xx < w; xx += 18) { ctx.beginPath(); ctx.arc(xx, yy, 4, 0, 7); ctx.fill(); }
+      fn(w, h); ctx.restore(); ctx.lineWidth = 12; ctx.strokeStyle = '#111'; ctx.strokeRect(0, 0, w, h); ctx.restore(); };
+    panel(60, 500, 960, 470, -.02, prog(t, 0, .3), '#ffd6e7', (w, h) => { hero(ctx, 300, 1180, 1.25, CAST2.ishita, { t, emo: 'neutral', pose: 'phone', look: .3 }); bubble(ctx, 'Ye hotspot kaise ON karte hain?', 640, 120, 520, 1, [400, 260], { size: 38 }); });
+    panel(80, 1000, 440, 560, .03, prog(t, .8, .3), '#cfe2ff', (w, h) => { phoneGlow(ctx, w / 2, h / 2 + 20, t, 2.2); burst(w / 2, 110, 'BLINK!', t); });
+    panel(560, 1000, 440, 560, -.025, prog(t, 1.6, .3), '#fef3c7', (w, h) => { hero(ctx, w / 2, 1180, 1.25, CAST2.vihaan, { t, emo: 'shocked', look: -.5 }); bigText(ctx, '?!', w - 90, 120, 120, 1, '#fff', '#111'); });
+    function burst(x, y, txt, t) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = '#ffd400'; ctx.beginPath(); for (let i = 0; i < 24; i++) { const r = i % 2 ? 70 : 120, a = i / 24 * 7; ctx.lineTo(Math.cos(a) * r * 1.4, Math.sin(a) * r * .7); } ctx.closePath(); ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = '#111'; ctx.stroke(); ctx.font = '700 70px Fredoka'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#e11d48'; ctx.fillText(txt, 0, 4); ctx.restore(); }
+  } },
+  9: { name: 'Watercolour storybook', note: 'Soft painted washes, paper texture, slow pan', draw(t) {
+    const pan = lerp(-40, 40, ease.io(t / 3));
+    octx.save(); octx.clearRect(0, 0, 1080, 1920); octx.translate(pan, 0);
+    window.fs2 = (c, fill, lw = 4) => { c.fillStyle = fill; c.fill(); c.lineWidth = lw * 1.6; c.globalAlpha = .28; c.strokeStyle = '#7a5a6a'; c.stroke(); c.globalAlpha = 1; };
+    sceneTown(octx, t * .3); couple(octx, t); phoneGlow(octx, 540, 1060, t, .9, '#f472b6');
+    window.fs2 = realFs2; octx.restore();
+    ctx.fillStyle = '#f7f1e3'; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.save(); ctx.filter = 'blur(3px) saturate(0.85) brightness(1.06)'; ctx.globalAlpha = .9; ctx.drawImage(off, 0, 0); ctx.restore();
+    ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = .35; ctx.filter = 'blur(1px)'; ctx.drawImage(off, 3, 4); ctx.restore();
+    if (!window.PAPER) { const p = document.createElement('canvas'); p.width = 512; p.height = 512; const x = p.getContext('2d'), d = x.createImageData(512, 512); for (let i = 0; i < d.data.length; i += 4) { const v = 225 + hash(i) * 30; d.data[i] = v; d.data[i + 1] = v - 4; d.data[i + 2] = v - 12; d.data[i + 3] = 255; } x.putImageData(d, 0, 0); window.PAPER = p; }
+    ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = ctx.createPattern(window.PAPER, 'repeat'); ctx.fillRect(0, 0, 1080, 1920); ctx.restore();
+  } },
+  10: { name: '1930s rubber-hose', note: 'Black and white, bouncy, film scratches', draw(t) {
+    const ts = Math.floor(t * 12) / 12, f = Math.floor(t * 12);
+    octx.save(); octx.fillStyle = '#e9e4d8'; octx.fillRect(0, 0, 1080, 1920);
+    octx.fillStyle = '#cfc8b8'; octx.fillRect(0, 1340, 1080, 580);
+    for (let i = 0; i < 5; i++) { octx.fillStyle = '#bdb5a3'; octx.beginPath(); octx.arc(100 + i * 230, 1340, 90, Math.PI, 0); octx.fill(); }
+    const bounce = Math.abs(Math.sin(ts * 7)), sq = 1 + bounce * .08;
+    for (const [x, L, ph, pose] of [[380, CAST2.ishita, 0, 'idle'], [700, CAST2.vihaan, 1, ts > .9 && ts < 2.4 ? 'wave' : 'idle']]) {
+      octx.save(); octx.translate(x, 1360 - bounce * 40); octx.scale(1 / sq, sq); hero(octx, 0, 0, 1.0, L, { t: ts + ph, emo: 'happy', pose }); octx.restore();
+    }
+    phoneGlow(octx, 540, 1060 - bounce * 30, ts, .9, '#000'); octx.restore();
+    ctx.save(); ctx.filter = `grayscale(1) contrast(1.5) brightness(${.92 + hash(f) * .14})`; ctx.drawImage(off, (hash(f + 7) - .5) * 6, (hash(f + 9) - .5) * 6); ctx.restore();
+    ctx.strokeStyle = 'rgba(30,30,30,.55)'; for (let i = 0; i < 3; i++) { if (hash(f * 3 + i) > .5) { const x = hash(f * 7 + i) * 1080; ctx.lineWidth = 1 + hash(f + i) * 2; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + (hash(i + f) - .5) * 30, 1920); ctx.stroke(); } }
+    ctx.fillStyle = 'rgba(20,20,20,.6)'; for (let i = 0; i < 12; i++) { ctx.beginPath(); ctx.arc(hash(f * 11 + i) * 1080, hash(f * 13 + i) * 1920, 1 + hash(i + f * 2) * 4, 0, 7); ctx.fill(); }
+    const vg = ctx.createRadialGradient(540, 960, 380, 540, 960, 1150); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.75)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, 1080, 1920);
+    if (t > 2.3) { const r = lerp(1300, 0, ease.in(prog(t, 2.3, .65))); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1080, 1920); ctx.arc(540, 1060, Math.max(r, 1), 0, Math.PI * 2, true); ctx.fillStyle = '#000'; ctx.fill('evenodd'); ctx.restore(); }
+  } },
+};
+
+window.renderStyle = (n, t) => {
+  ctx.save(); ctx.clearRect(0, 0, 1080, 1920); STYLES[n].draw(t); ctx.restore();
+  const k = prog(t, .05, .25) * (1 - prog(t, 2.7, .25));
+  if (k > 0 && !(n === 10 && t > 2.6)) label(n, STYLES[n].name, STYLES[n].note, k);
+  return cv.toDataURL('image/jpeg', .92);
+};
+boot();
+</script></body></html>
