@@ -12,9 +12,9 @@ Save as `ep01-shot1.mp4` … `ep01-shot8.mp4` and `ep01-vo1.mp3` … (or one ful
 - **Narrator:** "Two strangers… same city, same college… and no idea they were made for each other."
 
 ### Shot 2: Small-town girl
-- **Image:** Ishita walking down a small Indian town lane (<hometown, to be chosen>) holding books, tiled-roof houses, a kirana shop, electric wires overhead, a cow resting by the road, morning sunlight.
+- **Image:** Ishita walking down a small Indian town lane (Dharwad) holding books, tiled-roof houses, a kirana shop, electric wires overhead, a cow resting by the road, morning sunlight.
 - **Motion:** Ishita walks toward the camera with a soft smile, dupatta flowing, a shopkeeper waves at her, light camera tracking backward.
-- **Narrator:** "This is Ishita. A simple girl from a small town called <hometown, to be chosen>."
+- **Narrator:** "This is Ishita. A simple girl from a small town called Dharwad."
 
 ### Shot 3: The decision
 - **Image:** Inside a modest living room, Appa holding an engineering admission letter, Amma beside him smiling proudly, Ishita sitting on the sofa looking down, upset.
@@ -23,7 +23,7 @@ Save as `ep01-shot1.mp4` … `ep01-shot8.mp4` and `ep01-vo1.mp3` … (or one ful
 - **Ishita (soft):** "But Appa… I never wanted engineering."
 
 ### Shot 4: Leaving home
-- **Image:** Busy Indian railway platform (<hometown> station), Ishita with a suitcase hugging Amma, Appa holding her bag, train waiting.
+- **Image:** Busy Indian railway platform (Dharwad station), Ishita with a suitcase hugging Amma, Appa holding her bag, train waiting.
 - **Motion:** Ishita hugs Amma tightly, Appa pats her head, she boards the train and waves from the door as it starts moving.
 - **Narrator:** "With one suitcase and a heavy heart… she left for the big city, Bangalore."
 

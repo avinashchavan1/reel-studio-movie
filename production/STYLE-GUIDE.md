@@ -44,9 +44,9 @@ cheerful wide grin. Outfit: lavender kurti, blue jeans, a tote bag, always holdi
 **AMMA (mother, 45)**: Indian woman, hair in a bun with jasmine flowers, green cotton saree with gold border, red bindi, warm worried smile.
 
 ## Recurring sets
-- **<hometown, to be chosen>**: small Indian town lane, tiled-roof houses, a kirana shop, electric poles and wires, mango tree, autos and scooters.
+- **Dharwad**: small Indian town lane, tiled-roof houses, a kirana shop, electric poles and wires, mango tree, autos and scooters.
 - **Ishita's home**: modest living room, cream walls, wall calendar, framed family photo, steel tumblers on a table.
-- **<hometown> station / Bangalore City station**: Indian railway platform, yellow edge line, departure board, two trains.
+- **Dharwad station / Bangalore City station**: Indian railway platform, yellow edge line, departure board, two trains.
 - **Bangalore**: busy Indian metro city, flyovers, glass towers, traffic, metro line.
 - **Silicon Valley Institute of Technology**: big red-brick gate with the sign "SILICON VALLEY INSTITUTE OF TECHNOLOGY", a cream
   colonial-style main building, green lawns; **Lotus Block** (pink trim) and **Orchid Block** (blue trim).

@@ -49,7 +49,7 @@ Shared style: chibi proportions (big round head about 45% of height), dot-oval e
 
 | Location | Palette | Key elements |
 |---|---|---|
-| **<hometown, to be chosen>** (hometown) | warm peach, leaf green, sunny yellow | tiled-roof houses, mango tree, a dusty lane, temple bell, sunset |
+| **Dharwad** (hometown) | warm peach, leaf green, sunny yellow | tiled-roof houses, mango tree, a dusty lane, temple bell, sunset |
 | **Ishita's home** | cream walls, wood brown | window with curtains, family photo frame, sofa, the "big decision" table |
 | **Train journey** | sunset orange to lilac | pink train, rolling hills, a city skyline rising in the distance |
 | **Bangalore** (big city) | blue-violet, neon pink lights | tall towers, traffic, metro line, city lights at night |
@@ -81,7 +81,7 @@ Voice script: `production/voices/make_voices.py`.
 
 | Ep | Title | What happens | Ends on |
 |---|---|---|---|
-| 1 | **Two Strangers** | Ishita from <hometown, to be chosen> is pushed into engineering, moves to Bangalore, Day 1 at SIT with Zoya. Vihaan is in another block. | "One tiny thing was about to change everything…" |
+| 1 | **Two Strangers** | Ishita from Dharwad is pushed into engineering, moves to Bangalore, Day 1 at SIT with Zoya. Vihaan is in another block. | "One tiny thing was about to change everything…" |
 | 2 | **The Smartphone** | Ishita's birthday, her first smartphone, and she has no idea how to use it. | She discovers the "hotspot" button |
 | 3 | **The Hotspot** | Tanvi borrows Ishita's hotspot, no password. Downstairs in the science lab, Vihaan connects to it. | "He connected to her WiFi… before he connected to her heart" |
 | 4 | **Same Platform, Different Trains** | After the holidays, both are on the same platform, on different trains, still strangers. | Two trains leave side by side |
