@@ -6,7 +6,8 @@ Claude is the writer, voice director, animator and editor; the user publishes fr
 ## Never lose data (standing instruction from the user)
 - After EVERY change (new episode, re-render, voices, score, studio code, docs, plan/profile edits), run:
   1. `cd studio && npm run prune` (removes superseded media so the repo stays lean)
-  2. privacy check: `git grep -i -E "<real names from PRIVATE-name-map.md>"` must return nothing
+  2. privacy check: `git grep -I -i -w <name> HEAD` for every PERSON name in PRIVATE-name-map.md must return nothing
+     (Bangalore is kept real by choice; Facebook only appears as a publishing platform)
   3. `git add -A && git commit` (with the session attribution lines) and `git push`
 - Finished reels ARE committed: `studio/data/media/renders/` (both cuts + posters), voices (`audio/`), scores (`music/`), and copies in `output/`.
 - `studio/data/project.json` is the single source of truth for series, cast, places, plan, calendar, profiles, stats, episodes.
