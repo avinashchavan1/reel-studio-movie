@@ -161,7 +161,7 @@ let GRAIN = null;
 function finishFrame(g, t, f) {
   const W = VIDEO.width, H = VIDEO.height;
   if (f.vignette) {
-    const v = g.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.75);
+    const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.42, W / 2, H / 2, Math.max(W, H) * 0.62); // works for portrait too
     v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, `rgba(${f.vignetteColor || '20,15,25'},${f.vignette})`);
     g.fillStyle = v; g.fillRect(0, 0, W, H);
   }
@@ -333,7 +333,7 @@ export function makeCharacter(o = {}) {
   const M = o.mat || toon;
   const skin = M(o.skin || '#f2c6a0'), shirt = M(o.shirt || '#e4572e'), pants = M(o.pants || '#3b5b92'), shoe = M(o.shoe || '#3a2c2c');
   const hair = M(o.hair || '#4a2f22'), white = M('#ffffff', 2), dark = new THREE.MeshBasicMaterial({ color: '#1d1820' });
-  const ol = o.outline === false ? x => x : x => outline(x, o.outlineWidth ?? 0.018);
+  const ol = o.outline === false ? x => x : x => outline(x, o.outlineWidth ?? 0.018, o.outlineColor || '#2a2230');
   const root = new THREE.Group();
   const hips = new THREE.Group(); hips.position.y = 0.62; root.add(hips);
   const torso = ol(mesh(new THREE.CapsuleGeometry(0.2, 0.28, 6, 16), shirt, { pos: [0, 0.28, 0] }));
@@ -553,7 +553,7 @@ function startPlayer(film) {
 export function makePerson(o = {}) {
   const M = o.mat || toon;
   const c = makeCharacter({ ...o, shirt: o.outfitColor || o.shirt });
-  const ol = x => outline(x, 0.016);
+  const ol = o.outline === false ? x => x : x => outline(x, (o.outlineWidth ?? 0.018) * 0.9, o.outlineColor || '#2a2230');
   const hairM = M(o.hair || '#2a1a17');
   const H = c.head; // sphere r 0.24 centred at the head group's origin (head mesh at y .22 inside neck)
   const add = (parent, m) => { parent.add(m); return m; };

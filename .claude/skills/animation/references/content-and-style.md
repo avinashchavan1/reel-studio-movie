@@ -30,3 +30,9 @@ Run this on the 1-fps contact sheets of every finished cut, then fix and re-rend
 - Explainers: each step is visible and in the right order, labels sit next to what they name and are readable, nothing on screen is factually wrong.
 - Titles and labels are readable against what's behind them.
 - Sound lands on its action: steps match feet, the thud matches the landing.
+
+## Vertical reels (9:16)
+
+- 2026-11-19: For Instagram Reels / YouTube Shorts, set `createStage` to 1080x1920 in `src/main.js` and the `<canvas>` in `build.mjs`. The horizontal field of view is narrow in portrait, so pull the camera back (about 6.5–7.5 units for two characters at fov 32) and keep the full figures in frame; close landscape distances crop people at the sides.
+- 2026-11-19: Labels and titles need a translucent dark band behind them in portrait, because the sky fills the top of the frame and light text disappears into it. Keep text inside the safe zone (away from the top ~250 px and bottom ~420 px).
+- 2026-11-19: `makePerson` (kit.js) dresses characters (kurta, saree, dupatta, braid, glasses, moustache, bindi...). Use it for people instead of hand-adding accessories in story.js, so the design sheet and the film always match.

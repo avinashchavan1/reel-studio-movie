@@ -161,7 +161,7 @@ let GRAIN = null;
 function finishFrame(g, t, f) {
   const W = VIDEO.width, H = VIDEO.height;
   if (f.vignette) {
-    const v = g.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.75);
+    const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.42, W / 2, H / 2, Math.max(W, H) * 0.62); // works for portrait too
     v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, `rgba(${f.vignetteColor || '20,15,25'},${f.vignette})`);
     g.fillStyle = v; g.fillRect(0, 0, W, H);
   }
@@ -333,7 +333,7 @@ export function makeCharacter(o = {}) {
   const M = o.mat || toon;
   const skin = M(o.skin || '#f2c6a0'), shirt = M(o.shirt || '#e4572e'), pants = M(o.pants || '#3b5b92'), shoe = M(o.shoe || '#3a2c2c');
   const hair = M(o.hair || '#4a2f22'), white = M('#ffffff', 2), dark = new THREE.MeshBasicMaterial({ color: '#1d1820' });
-  const ol = o.outline === false ? x => x : x => outline(x, o.outlineWidth ?? 0.018);
+  const ol = o.outline === false ? x => x : x => outline(x, o.outlineWidth ?? 0.018, o.outlineColor || '#2a2230');
   const root = new THREE.Group();
   const hips = new THREE.Group(); hips.position.y = 0.62; root.add(hips);
   const torso = ol(mesh(new THREE.CapsuleGeometry(0.2, 0.28, 6, 16), shirt, { pos: [0, 0.28, 0] }));
@@ -482,13 +482,17 @@ export function renderDesignSheet(stage, items, o = {}) {
     g.fillStyle = '#2a2230'; g.font = '600 38px Title, Georgia, serif'; g.fillText(it.name, pad, y0 + 30);
     if (it.note) { g.fillStyle = '#6b6470'; g.font = '24px system-ui, sans-serif'; g.fillText(it.note, pad, y0 + 64); }
     views.forEach(([label, yaw], col) => {
-      const dist = sph.radius / Math.sin(THREE.MathUtils.degToRad(cam.fov / 2)) * 0.85 * (it.zoom ? 1 / it.zoom : 1);
+      // crop a cw:ch window out of the stage frame (works for landscape and portrait stages)
+      const ar = cw / ch, landscape = stage.W / stage.H > ar;
+      const cropH = landscape ? stage.H : stage.W / ar;
+      const dist = sph.radius / Math.sin(THREE.MathUtils.degToRad(cam.fov / 2)) * 0.85 * (it.zoom ? 1 / it.zoom : 1) * (stage.H / cropH);
       const el = 0.12;
       cam.position.set(sph.center.x + Math.sin(yaw) * Math.cos(el) * dist, sph.center.y + Math.sin(el) * dist, sph.center.z + Math.cos(yaw) * Math.cos(el) * dist);
       cam.lookAt(sph.center); cam.updateProjectionMatrix();
       stage.renderer.render(scene, cam);
-      const sw = stage.H * cw / ch, sx = (stage.W - sw) / 2, x = pad + col * cw, y = y0 + head;
-      g.drawImage(stage.renderer.domElement, sx, 0, sw, stage.H, x + 4, y, cw - 8, ch - 8);
+      const sw = landscape ? stage.H * ar : stage.W, sh = landscape ? stage.H : stage.W / ar;
+      const sx = (stage.W - sw) / 2, sy = (stage.H - sh) / 2, x = pad + col * cw, y = y0 + head;
+      g.drawImage(stage.renderer.domElement, sx, sy, sw, sh, x + 4, y, cw - 8, ch - 8);
       g.fillStyle = 'rgba(42,34,48,0.55)'; g.font = '20px system-ui, sans-serif'; g.fillText(label, x + 16, y + 24);
     });
     scene.remove(holder);
@@ -538,4 +542,92 @@ function startPlayer(film) {
     label();
     requestAnimationFrame(loop);
   })();
+}
+
+// ---------------------------------------------------------------- dressed people (Indian wardrobe + hair)
+// makePerson builds on makeCharacter and adds clothes/hair/accessories that follow the same pose().
+// o: everything makeCharacter takes, plus
+//   hairStyle: 'short' | 'quiff' | 'long' | 'braid' | 'bun' | 'bunlow' | 'twobraids' | 'side'
+//   outfit: 'kurta' | 'kurti' | 'shirt' | 'saree' | 'tee', outfitColor, trim
+//   dupatta, glasses, specs, moustache, bindi, earrings, jasmine, backpack, earphones, phone, greySides, check
+export function makePerson(o = {}) {
+  const M = o.mat || toon;
+  const c = makeCharacter({ ...o, shirt: o.outfitColor || o.shirt });
+  const ol = o.outline === false ? x => x : x => outline(x, (o.outlineWidth ?? 0.018) * 0.9, o.outlineColor || '#2a2230');
+  const hairM = M(o.hair || '#2a1a17');
+  const H = c.head; // sphere r 0.24 centred at the head group's origin (head mesh at y .22 inside neck)
+  const add = (parent, m) => { parent.add(m); return m; };
+  // ---- hair
+  const hs = o.hairStyle || 'short';
+  if (['long', 'braid'].includes(hs)) { // fall of hair behind the head and down the back
+    add(H, mesh(new THREE.CapsuleGeometry(0.2, 0.34, 6, 16), hairM, { pos: [0, -0.2, -0.1], scale: [1.18, 1, 0.75] }));
+  }
+  if (['bun', 'jasmine'].includes(hs) || hs === 'bun') add(H, ol(mesh(new THREE.SphereGeometry(0.11, 18, 14), hairM, { pos: [0, 0.22, -0.1] })));
+  if (hs === 'bunlow') add(H, ol(mesh(new THREE.SphereGeometry(0.1, 18, 14), hairM, { pos: [0, -0.02, -0.25] })));
+  if (hs === 'twobraids') for (const sd of [-1, 1]) for (let i = 0; i < 4; i++) add(H, mesh(new THREE.SphereGeometry(0.055 - i * 0.004, 12, 10), hairM, { pos: [sd * 0.22, -0.1 - i * 0.075, -0.02] }));
+  if (hs === 'quiff') for (const [x, z, h, r] of [[-0.08, 0.08, 0.14, 0.4], [0.02, 0.12, 0.17, 0.15], [0.1, 0.07, 0.13, -0.3], [0.0, -0.02, 0.15, 0]]) {
+    add(H, mesh(new THREE.ConeGeometry(0.06, h, 8), hairM, { pos: [x, 0.25, z], rot: [0.5, 0, r] }));
+  }
+  if (hs === 'side' || o.greySides) for (const sd of [-1, 1]) add(H, mesh(new THREE.SphereGeometry(0.06, 12, 10), M(o.greySides ? '#a8a29e' : (o.hair || '#2a1a17')), { pos: [sd * 0.225, 0.0, -0.03], scale: [0.6, 1.2, 1] }));
+  // fringe/bangs for long-haired characters
+  if (['long', 'braid', 'bun', 'bunlow', 'twobraids'].includes(hs)) add(H, mesh(new THREE.SphereGeometry(0.252, 24, 12, Math.PI * 0.15, Math.PI * 0.7, 0, Math.PI * 0.3), hairM, { pos: [0, 0.02, 0.01], rot: [0.15, Math.PI, 0] }));
+  let braid = null;
+  if (hs === 'braid') { // braid over the left shoulder, hanging in front
+    braid = new THREE.Group(); c.hips.add(braid);
+    for (let i = 0; i < 7; i++) braid.add(mesh(new THREE.SphereGeometry(0.052 - i * 0.003, 12, 10), hairM, { pos: [0.15 - i * 0.004, 0.86 - i * 0.075, 0.13 + Math.sin(i) * 0.008] }));
+    braid.add(mesh(new THREE.SphereGeometry(0.03, 10, 8), M(o.clip || '#ff5d8f'), { pos: [0.13, 0.35, 0.15] }));
+  }
+  if (o.clip && hs !== 'braid') add(H, mesh(new THREE.BoxGeometry(0.09, 0.03, 0.03), M(o.clip), { pos: [0.13, 0.17, 0.12], rot: [0, 0, 0.4] }));
+  if (o.clip && hs === 'braid') add(H, mesh(new THREE.BoxGeometry(0.09, 0.03, 0.03), M(o.clip), { pos: [0.13, 0.17, 0.12], rot: [0, 0, 0.4] }));
+  if (o.jasmine) for (let i = 0; i < 7; i++) { const a = -1 + i * 0.33; add(H, mesh(new THREE.SphereGeometry(0.022, 8, 6), M('#ffffff', 2), { pos: [Math.sin(a) * 0.12, (hs === 'bunlow' ? -0.02 : 0.22) + Math.cos(a) * 0.02, (hs === 'bunlow' ? -0.25 : -0.1) - Math.cos(a) * 0.1] })); }
+  // ---- face details
+  if (o.bindi) add(H, mesh(new THREE.SphereGeometry(0.016, 8, 6), new THREE.MeshBasicMaterial({ color: o.bindiColor || '#b0123a' }), { pos: [0, 0.1, 0.236], shadow: false }));
+  if (o.earrings) for (const sd of [-1, 1]) add(H, mesh(new THREE.SphereGeometry(0.022, 8, 6), M(o.earrings), { pos: [sd * 0.235, -0.06, 0.0] }));
+  if (o.moustache) add(H, mesh(new THREE.CapsuleGeometry(0.018, 0.09, 4, 8), new THREE.MeshBasicMaterial({ color: '#2b2220' }), { pos: [0, -0.035, 0.228], rot: [0, 0, Math.PI / 2] }));
+  if (o.glasses || o.specs) {
+    const fm = new THREE.MeshBasicMaterial({ color: o.specs ? '#57534e' : '#1f1f1f' });
+    for (const sd of [-1, 1]) add(H, mesh(new THREE.TorusGeometry(0.058, 0.009, 6, 20), fm, { pos: [sd * 0.085, 0.03, 0.235], shadow: false }));
+    add(H, mesh(new THREE.BoxGeometry(0.05, 0.01, 0.01), fm, { pos: [0, 0.035, 0.24], shadow: false }));
+  }
+  // ---- clothes
+  const oc = M(o.outfitColor || o.shirt || '#e4572e'), trim = M(o.trim || '#ffd36e');
+  if (o.outfit === 'kurta' || o.outfit === 'kurti') { // long tunic flaring over the thighs
+    const len = o.outfit === 'kurta' ? 0.42 : 0.28;
+    const g = new THREE.CylinderGeometry(0.205, o.outfit === 'kurta' ? 0.3 : 0.25, len, 20, 1, true); g.translate(0, -len / 2, 0);
+    add(c.hips, ol(mesh(g, oc, { pos: [0, 0.12, 0], scale: [1, 1, 0.82] })));
+    add(c.hips, mesh(new THREE.TorusGeometry(o.outfit === 'kurta' ? 0.3 : 0.25, 0.012, 6, 28), trim, { pos: [0, 0.12 - len, 0], rot: [Math.PI / 2, 0, 0], scale: [1, 0.82, 1] }));
+    add(c.hips, mesh(new THREE.TorusGeometry(0.09, 0.01, 6, 20, Math.PI), trim, { pos: [0, 0.5, 0.15], rot: [0.35, 0, Math.PI] })); // neckline
+  }
+  if (o.outfit === 'saree') { // long skirt to the ankles + pallu across the chest
+    const g = new THREE.CylinderGeometry(0.2, 0.3, 0.66, 22, 1, true); g.translate(0, -0.33, 0);
+    add(c.hips, ol(mesh(g, oc, { pos: [0, 0.08, 0], scale: [1, 1, 0.85] })));
+    add(c.hips, mesh(new THREE.TorusGeometry(0.3, 0.014, 6, 28), trim, { pos: [0, -0.57, 0], rot: [Math.PI / 2, 0, 0], scale: [1, 0.85, 1] }));
+    const pallu = add(c.hips, ol(mesh(new THREE.BoxGeometry(0.13, 0.5, 0.03), M(o.outfitColor || '#3fae7a'), { pos: [0.02, 0.33, 0.165], rot: [0, 0, 0.65] })));
+    pallu.add(mesh(new THREE.BoxGeometry(0.02, 0.5, 0.032), trim, { pos: [0.065, 0, 0] }));
+  }
+  if (o.outfit === 'shirt' && o.check) { // checked shirt: thin light bands on the torso
+    for (let i = 0; i < 4; i++) add(c.hips, mesh(new THREE.TorusGeometry(0.205, 0.006, 4, 24), M(o.check), { pos: [0, 0.18 + i * 0.09, 0], rot: [Math.PI / 2, 0, 0], scale: [1, 0.8, 1], shadow: false }));
+    add(c.hips, mesh(new THREE.ConeGeometry(0.07, 0.12, 3), M('#ffffff'), { pos: [0, 0.5, 0.15], rot: [Math.PI, 0, 0] })); // tee in the open collar
+  }
+  let dupatta = null;
+  if (o.dupatta) { // drape over both shoulders, tails behind
+    dupatta = new THREE.Group(); c.hips.add(dupatta);
+    dupatta.add(mesh(new THREE.TorusGeometry(0.2, 0.03, 8, 24, Math.PI), M(o.dupatta), { pos: [0, 0.6, 0.06], rot: [0.5, 0, Math.PI] }));
+    for (const sd of [-1, 1]) dupatta.add(mesh(new THREE.BoxGeometry(0.1, 0.55, 0.02), M(o.dupatta), { pos: [sd * 0.2, 0.33, -0.15], rot: [0.12, 0, sd * 0.06] }));
+  }
+  if (o.backpack) add(c.hips, ol(mesh(new THREE.BoxGeometry(0.3, 0.34, 0.14), M(o.backpack), { pos: [0, 0.3, -0.2] })));
+  if (o.earphones) add(c.neck, mesh(new THREE.TorusGeometry(0.13, 0.008, 6, 24, Math.PI * 1.2), M('#ffffff', 2), { pos: [0, -0.02, 0.03], rot: [Math.PI / 2 + 0.3, 0, -0.95] }));
+  let phone = null;
+  if (o.phone) { phone = mesh(new THREE.BoxGeometry(0.05, 0.1, 0.012), M('#27272a'), { pos: [0, -0.24, 0.05] }); c.arm.R.el.add(phone); }
+  // pose: same options as makeCharacter, plus `t` for cloth sway
+  const basePose = c.pose;
+  c.pose = (p = {}) => {
+    basePose(p);
+    const t = p.t ?? p.blinkT ?? 0;
+    if (dupatta) dupatta.rotation.x = Math.sin(t * 2.2) * 0.04 + (p.walk || 0) * 0.08;
+    if (braid) braid.rotation.z = Math.sin(t * 1.8) * 0.03;
+  };
+  c.phone = phone;
+  c.pose({});
+  return c;
 }
