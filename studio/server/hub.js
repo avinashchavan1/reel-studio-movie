@@ -6,7 +6,12 @@ import path from 'path';
 import crypto from 'crypto';
 import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { load, priv, ROOT, mediaPath } from './store.js';
+import { load, priv, ROOT, DATA, mediaPath } from './store.js';
+
+// Non-secret hub config (site id + url) is committed so redeploys keep the same link; the PIN hash stays private.
+const PUBLIC_CFG = path.join(DATA, 'hub.json');
+const readCfg = () => ({ ...priv.read('hub', {}), ...(fs.existsSync(PUBLIC_CFG) ? JSON.parse(fs.readFileSync(PUBLIC_CFG, 'utf8')) : {}) });
+const writeCfg = c => { const { pinHash, ...pub } = c; fs.writeFileSync(PUBLIC_CFG, JSON.stringify(pub, null, 2)); priv.write('hub', { pinHash }); };
 import { ctaFor } from './publish.js';
 import { scanEpisode } from './privacy.js';
 
@@ -23,9 +28,9 @@ const PLATFORMS = {
 };
 
 export function buildHub({ pin } = {}) {
-  const p = load(); const cfg = priv.read('hub', {});
+  const p = load(); const cfg = readCfg();
   if (pin) cfg.pinHash = crypto.createHash('sha256').update(String(pin)).digest('hex');
-  priv.write('hub', cfg);
+  writeCfg(cfg);
   fs.rmSync(path.join(PUB, 'media'), { recursive: true, force: true }); fs.mkdirSync(path.join(PUB, 'media'), { recursive: true });
   const put = (url, name) => { if (!url) return ''; fs.copyFileSync(mediaPath(url), path.join(PUB, 'media', name)); return `/media/${name}`; };
   const episodes = [];
@@ -58,10 +63,10 @@ async function nf(pathname, opts = {}) {
 }
 
 export async function deployHub(onProgress = () => {}) {
-  const cfg = priv.read('hub', {});
+  const cfg = readCfg();
   if (!cfg.siteId) {
     const site = await nf('/sites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: `stf-hub-${crypto.randomBytes(4).toString('hex')}` }) });
-    cfg.siteId = site.id; cfg.url = site.ssl_url || site.url; priv.write('hub', cfg);
+    cfg.siteId = site.id; cfg.url = site.ssl_url || site.url; writeCfg(cfg);
   }
   const files = {}, byHash = {};
   const walk = d => { for (const f of fs.readdirSync(d)) { const a = path.join(d, f); if (fs.statSync(a).isDirectory()) walk(a); else { const rel = '/' + path.relative(DIST, a).split(path.sep).join('/'); const h = crypto.createHash('sha1').update(fs.readFileSync(a)).digest('hex'); files[rel] = h; (byHash[h] ||= []).push(rel); } } };
@@ -74,7 +79,7 @@ export async function deployHub(onProgress = () => {}) {
     onProgress((i + 1) / Math.max(1, required.length));
   }
   for (let i = 0; i < 60; i++) { const d = await nf(`/deploys/${dep.id}`); if (d.state === 'ready') break; if (d.state === 'error') throw new Error('Netlify deploy failed: ' + d.error_message); await new Promise(r => setTimeout(r, 2000)); }
-  cfg.lastDeploy = new Date().toISOString(); priv.write('hub', cfg);
+  cfg.lastDeploy = new Date().toISOString(); writeCfg(cfg);
   return { url: cfg.url, uploaded: required.length, files: Object.keys(files).length };
 }
 

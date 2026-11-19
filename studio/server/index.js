@@ -253,7 +253,7 @@ setInterval(async () => {
 }, 30000);
 
 // ---------- Publish Hub (Netlify) ----------
-app.get('/api/hub', h(async () => { const { priv } = await import('./store.js'); const c = priv.read('hub', {}); return { url: c.url || null, lastDeploy: c.lastDeploy || null, pin: !!c.pinHash }; }));
+app.get('/api/hub', h(async () => { const { priv, DATA } = await import('./store.js'); const f = path.join(DATA, 'hub.json'); const c = { ...priv.read('hub', {}), ...(fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {}) }; return { url: c.url || null, lastDeploy: c.lastDeploy || null, pin: !!c.pinHash }; }));
 app.post('/api/hub/deploy', h(async req => {
   const { buildHub, deployHub } = await import('./hub.js');
   return enqueue('hub', 'Publish Hub → Netlify', async prog => { buildHub({ pin: req.body?.pin || undefined }); prog(0.2); return deployHub(x => prog(0.2 + 0.8 * x)); });
