@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="engine.js"></script>
+<script>
+const ep = new URLSearchParams(location.search).get('ep') || 'ep01';
+const ctx = document.getElementById('c').getContext('2d');
+async function boot() {
+  for (const wgt of [600, 700]) {
+    const f = new FontFace('Fredoka', `url(../fonts/Fredoka-${wgt}.woff2)`, { weight: String(wgt) });
+    document.fonts.add(await f.load());
+  }
+  await new Promise((res, rej) => { const s = document.createElement('script'); s.src = `../episodes/${ep}.js`; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  window.EP_DURATION = EPISODE.scenes.reduce((a, s) => a + s.dur, 0);
+  window.READY = true;
+}
+window.renderFrame = (t, fmt = 'image/jpeg') => {
+  const scenes = EPISODE.scenes; let acc = 0, i = 0;
+  while (i < scenes.length - 1 && t >= acc + scenes[i].dur) { acc += scenes[i].dur; i++; }
+  const sc = scenes[i], lt = t - acc;
+  ctx.save(); ctx.clearRect(0, 0, W, H); sc.draw(ctx, lt, sc.dur); ctx.restore();
+  if (!sc.noBadge) chip(ctx, `Strangers to Forever  ·  Ep ${EPISODE.num}`, W / 2, 255, 1, 'rgba(74,59,82,.55)', '#fff', 30);
+  // soft dip-to-blush transitions
+  const fin = i === 0 ? 1 : clamp(lt / .3), fout = i === scenes.length - 1 ? 1 : clamp((sc.dur - lt) / .3);
+  const a = 1 - Math.min(fin, fout);
+  if (a > 0) { ctx.fillStyle = `rgba(255,236,244,${a})`; ctx.fillRect(0, 0, W, H); }
+  return ctx.canvas.toDataURL(fmt, .93);
+};
+boot();
+</script></body></html>
