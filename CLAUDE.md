@@ -9,6 +9,10 @@ Claude is the writer, voice director, animator and editor; the user publishes fr
   2. privacy check: `git grep -I -i -w <name> HEAD` for every PERSON name in PRIVATE-name-map.md must return nothing
      (Bangalore is kept real by choice; Facebook only appears as a publishing platform)
   3. `git add -A && git commit` (with the session attribution lines) and `git push`
+  4. ALWAYS DEPLOY (standing instruction): `cd studio && npm run hub && npm run deploy:studio`
+     - Publish Hub: https://stf-hub-f82adfcb.netlify.app
+     - View-only Studio: https://stf-studio-891e2c99.netlify.app (same PIN as the hub)
+     - Then commit again (deploys update studio/data/hub.json + studio-site.json timestamps)
 - Finished reels ARE committed: `studio/data/media/renders/` (both cuts + posters), voices (`audio/`), scores (`music/`), and copies in `output/`.
 - `studio/data/project.json` is the single source of truth for series, cast, places, plan, calendar, profiles, stats, episodes.
 

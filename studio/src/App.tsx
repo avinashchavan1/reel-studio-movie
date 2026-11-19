@@ -4,7 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import clsx from 'clsx';
 import { AtSign, BookOpen, CalendarRange, Clapperboard, Film, LayoutDashboard, Menu, Settings as SettingsIcon, Sparkles, Users, X } from 'lucide-react';
-import { useCredits, useJobs, useProject } from './api';
+import { STATIC, useCredits, useJobs, useProject } from './api';
+import { PinGate } from './components/PinGate';
 import { Progress } from './components/ui';
 import Dashboard from './pages/Dashboard';
 import Reels from './pages/Reels';
@@ -61,6 +62,11 @@ function JobWatcher() {
 }
 
 export default function App() {
+  if (STATIC) return <PinGate><Studio /></PinGate>;
+  return <Studio />;
+}
+
+function Studio() {
   const { data: project, error } = useProject(); const [open, setOpen] = useState(false); const loc = useLocation();
   useEffect(() => setOpen(false), [loc.pathname]);
   const pending = project?.claudeRequests.filter(r => r.status === 'pending').length || 0;
@@ -91,6 +97,7 @@ export default function App() {
         <div className="lg:hidden sticky top-0 z-20 flex items-center gap-3 border-b border-white/[.06] bg-zinc-950/80 backdrop-blur px-4 py-3">
           <button onClick={() => setOpen(true)}><Menu className="size-5" /></button><span className="font-semibold">Reel Studio</span>
         </div>
+        {STATIC && <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-200">View-only copy of the studio · editing, voices and rendering happen in Claude Code</div>}
         <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
           {error ? <div className="text-rose-300">Can't reach the studio server: {(error as Error).message}</div> : !project ? <div className="text-zinc-400">Loading studio…</div> : (
             <Routes>

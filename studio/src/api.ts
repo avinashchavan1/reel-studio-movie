@@ -35,7 +35,21 @@ export type Project = {
 export const saveDoc = (key: string, value: unknown) => api(`/doc/${key}`, { method: 'PUT', body: value });
 export type Job = { id: string; kind: string; label: string; status: 'queued' | 'running' | 'done' | 'error'; progress: number; error?: string; createdAt: number; result?: any };
 
+// View-only deployment: reads come from a static snapshot, writes are disabled.
+export const STATIC = import.meta.env.VITE_STATIC === '1';
+async function staticApi(path: string, method: string) {
+  if (method !== 'GET') throw new Error('View-only studio. Ask Claude in Claude Code to make changes.');
+  const p = path.split('?')[0];
+  const map: Record<string, string> = { '/project': 'project', '/elevenlabs/credits': 'credits', '/integrations': 'integrations', '/hub': 'hub', '/elevenlabs/voices': 'voices' };
+  if (p === '/jobs') return [];
+  if (p === '/privacy/name-map') return [];
+  const m = p.match(/^\/episodes\/([^/]+)\/analysis$/);
+  const file = m ? `analysis-${m[1]}` : map[p];
+  if (!file) throw new Error('Not available in the view-only studio');
+  const r = await fetch(`/snapshot/${file}.json`); if (!r.ok) throw new Error('Snapshot missing'); return r.json();
+}
 export async function api<T = any>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
+  if (STATIC) return staticApi(path, opts.method || (opts.body !== undefined ? 'POST' : 'GET')) as Promise<T>;
   const r = await fetch('/api' + path, {
     method: opts.method || (opts.body !== undefined ? 'POST' : 'GET'),
     headers: opts.body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
