@@ -1,0 +1,20 @@
+{
+  "title": "Strangers to Forever Ep 1",
+  "duration": 40.74,
+  "fps": 24,
+  "shots": [
+    { "name": "hook", "at": 0 },
+    { "name": "dharwad", "at": 5.2 },
+    { "name": "home", "at": 10.71 },
+    { "name": "train", "at": 16.86 },
+    { "name": "bangalore", "at": 20.78 },
+    { "name": "college", "at": 25.25 },
+    { "name": "blocks", "at": 28.83 },
+    { "name": "hotspot", "at": 35.62 }
+  ],
+  "cues": {
+    "vo-hook": 0.45, "vo-dharwad": 5.65, "vo-appa": 11.16, "vo-ishita": 13.16, "vo-train": 17.31,
+    "vo-city": 21.23, "vo-zoya": 25.7, "vo-blocks": 29.28, "vo-hotspot": 36.07,
+    "hotspot-on": 38.2, "cta": 38.6
+  }
+}
