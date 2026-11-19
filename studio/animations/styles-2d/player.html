@@ -7,6 +7,7 @@
 <script>
 // Eight 2D animation techniques of the same moment: Ishita, Vihaan and her phone's hotspot on campus.
 // window.renderStyle(n, t) draws style n (sampler number) at local time t (0..3 s) and returns a JPEG data URL.
+ease.io = ease.inOut; ease.in = x => x * x * x; // aliases matching the 3D kit
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const off = document.createElement('canvas'); off.width = 1080; off.height = 1920; const octx = off.getContext('2d');
 const small = document.createElement('canvas'); const sctx = small.getContext('2d');
@@ -35,11 +36,11 @@ function phoneGlow(c, x, y, t, s = 1, col = '#ff5d8f') {
 }
 function label(n, name, note, k = 1, light = true) {
   ctx.save(); ctx.globalAlpha = .55 * k; ctx.fillStyle = '#120f1f';
-  ctx.beginPath(); ctx.roundRect(180, 150, 720, 330, 40); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(70, 150, 940, 330, 40); ctx.fill();
   ctx.beginPath(); ctx.roundRect(70, 1590, 940, 110, 30); ctx.fill(); ctx.globalAlpha = k;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 24;
-  ctx.font = '600 110px Title'; ctx.fillStyle = '#ffc93c'; ctx.fillText(`${n} / 10`, 540, 230);
-  ctx.font = '600 100px Title'; ctx.fillStyle = '#fffaf0'; ctx.fillText(name, 540, 394);
+  ctx.font = '600 110px Title'; ctx.fillStyle = '#ffc93c'; ctx.fillText(`${n} / 20`, 540, 230);
+  ctx.font = `600 ${name.length > 14 ? 84 : 100}px Title`; ctx.fillStyle = '#fffaf0'; ctx.fillText(name, 540, 394);
   ctx.font = '500 40px Title'; ctx.fillText(note, 540, 1645); ctx.restore();
 }
 
@@ -118,9 +119,9 @@ const STYLES = {
       ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.save(); ctx.clip(); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = 'rgba(0,0,0,.12)'; for (let yy = 0; yy < h; yy += 18) for (let xx = (yy / 18) % 2 ? 9 : 0; xx < w; xx += 18) { ctx.beginPath(); ctx.arc(xx, yy, 4, 0, 7); ctx.fill(); }
       fn(w, h); ctx.restore(); ctx.lineWidth = 12; ctx.strokeStyle = '#111'; ctx.strokeRect(0, 0, w, h); ctx.restore(); };
-    panel(60, 500, 960, 470, -.02, prog(t, 0, .3), '#ffd6e7', (w, h) => { hero(ctx, 300, 1180, 1.25, CAST2.ishita, { t, emo: 'neutral', pose: 'phone', look: .3 }); bubble(ctx, 'Ye hotspot kaise ON karte hain?', 640, 120, 520, 1, [400, 260], { size: 38 }); });
+    panel(60, 500, 960, 470, -.02, prog(t, 0, .3), '#ffd6e7', (w, h) => { hero(ctx, 300, 900, 1.25, CAST2.ishita, { t, emo: 'neutral', pose: 'phone', look: .3 }); bubble(ctx, 'Ye hotspot kaise ON karte hain?', 640, 120, 520, 1, [400, 260], { size: 38 }); });
     panel(80, 1000, 440, 560, .03, prog(t, .8, .3), '#cfe2ff', (w, h) => { phoneGlow(ctx, w / 2, h / 2 + 20, t, 2.2); burst(w / 2, 110, 'BLINK!', t); });
-    panel(560, 1000, 440, 560, -.025, prog(t, 1.6, .3), '#fef3c7', (w, h) => { hero(ctx, w / 2, 1180, 1.25, CAST2.vihaan, { t, emo: 'shocked', look: -.5 }); bigText(ctx, '?!', w - 90, 120, 120, 1, '#fff', '#111'); });
+    panel(560, 1000, 440, 560, -.025, prog(t, 1.6, .3), '#fef3c7', (w, h) => { hero(ctx, w / 2, 1010, 1.25, CAST2.vihaan, { t, emo: 'shocked', look: -.5 }); bigText(ctx, '?!', w - 90, 120, 120, 1, '#fff', '#111'); });
     function burst(x, y, txt, t) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = '#ffd400'; ctx.beginPath(); for (let i = 0; i < 24; i++) { const r = i % 2 ? 70 : 120, a = i / 24 * 7; ctx.lineTo(Math.cos(a) * r * 1.4, Math.sin(a) * r * .7); } ctx.closePath(); ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = '#111'; ctx.stroke(); ctx.font = '700 70px Fredoka'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#e11d48'; ctx.fillText(txt, 0, 4); ctx.restore(); }
   } },
   9: { name: 'Watercolour storybook', note: 'Soft painted washes, paper texture, slow pan', draw(t) {
@@ -150,6 +151,117 @@ const STYLES = {
     ctx.fillStyle = 'rgba(20,20,20,.6)'; for (let i = 0; i < 12; i++) { ctx.beginPath(); ctx.arc(hash(f * 11 + i) * 1080, hash(f * 13 + i) * 1920, 1 + hash(i + f * 2) * 4, 0, 7); ctx.fill(); }
     const vg = ctx.createRadialGradient(540, 960, 380, 540, 960, 1150); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.75)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, 1080, 1920);
     if (t > 2.3) { const r = lerp(1300, 0, ease.in(prog(t, 2.3, .65))); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1080, 1920); ctx.arc(540, 1060, Math.max(r, 1), 0, Math.PI * 2, true); ctx.fillStyle = '#000'; ctx.fill('evenodd'); ctx.restore(); }
+  } },
+  11: { name: 'Kinetic typography', note: 'Words and icons are the animation', draw(t) {
+    ctx.fillStyle = '#120a24'; ctx.fillRect(0, 0, 1080, 1920);
+    const word = (txt, x, y, size, at, col, from) => { const k = ease.back(prog(t, at, .35)); if (k <= 0) return; ctx.save(); ctx.translate(x + (1 - k) * (from === 'l' ? -700 : from === 'r' ? 700 : 0), y + (from === 'u' ? (1 - k) * -500 : 0)); ctx.rotate(from === 'r' ? (1 - k) * .4 : 0); ctx.scale(from === 'z' ? k : 1, from === 'z' ? k : 1);
+      ctx.font = `700 ${size}px Fredoka`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = col; ctx.fillText(txt, 0, 0); ctx.restore(); };
+    word('EK', 540, 640, 180, 0, '#ffc93c', 'u');
+    word('WIFI', 540, 820, 230, .35, '#ff5d8f', 'l');
+    word('HOTSPOT', 540, 1010, 190, .7, '#ffffff', 'r');
+    const k = prog(t, 1.2, .5); if (k > 0) { ctx.save(); ctx.translate(540, 1300); ctx.lineCap = 'round'; [50, 95, 140].forEach((r, i) => { const kk = prog(t, 1.2 + i * .15, .3); ctx.beginPath(); ctx.arc(0, 0, r, -Math.PI * .78, -Math.PI * .78 + Math.PI * .56 * kk); ctx.lineWidth = 26; ctx.strokeStyle = '#ff5d8f'; ctx.stroke(); }); ctx.beginPath(); ctx.arc(0, 0, 18, 0, 7); ctx.fillStyle = '#ff5d8f'; ctx.fill(); ctx.restore(); }
+    const j = ease.io(prog(t, 1.9, .7)); if (t > 1.8) { [[-1, '#ff8fab'], [1, '#6ea8fe']].forEach(([sd, c]) => { ctx.beginPath(); ctx.arc(540 + sd * lerp(300, 30, j), 1480, 34, 0, 7); ctx.fillStyle = c; ctx.fill(); }); if (j > .95) heart(ctx, 540, 1480, 1.6 * ease.back(prog(t, 2.55, .3)), '#ff5d8f'); }
+    word('DO AJNABI', 540, 1400, 0.001, 9, '#fff', 'z');
+  } },
+  12: { name: 'Chalkboard', note: 'Chalk lines and dust on a green board', draw(t) {
+    ctx.fillStyle = '#23402f'; ctx.fillRect(0, 0, 1080, 1920);
+    for (let i = 0; i < 40; i++) { ctx.fillStyle = `rgba(255,255,255,${.02 + hash(i) * .04})`; ctx.beginPath(); ctx.ellipse(hash(i + 1) * 1080, hash(i + 2) * 1920, 80 + hash(i + 3) * 200, 20 + hash(i + 4) * 60, hash(i) * 3, 0, 7); ctx.fill(); }
+    const fb = Math.floor(t * 8), jx = (hash(fb) - .5) * 3, reveal = ease.io(prog(t, 0, 1.7));
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1080, 520 + reveal * 1100); ctx.clip(); ctx.translate(jx, 0);
+    window.fs2 = (c, fill, lw = 4) => { c.fillStyle = 'rgba(35,64,47,.0)'; c.fill(); c.lineCap = 'round'; c.lineWidth = lw * 1.3; c.strokeStyle = 'rgba(245,245,240,.85)'; c.stroke(); c.save(); c.translate(1.5, 1); c.lineWidth = lw * .6; c.strokeStyle = 'rgba(245,245,240,.35)'; c.stroke(); c.restore(); };
+    couple(ctx, t); window.fs2 = realFs2;
+    ctx.strokeStyle = 'rgba(255,214,102,.9)'; ctx.lineWidth = 7; [14, 26, 38].forEach(r => { ctx.beginPath(); ctx.arc(540, 1080, r, -Math.PI * .78, -Math.PI * .22); ctx.stroke(); });
+    ctx.restore();
+    if (t > 1.8) { ctx.globalAlpha = prog(t, 1.8, .5); ctx.fillStyle = 'rgba(245,245,240,.9)'; ctx.font = '700 70px Fredoka'; ctx.textAlign = 'center'; ctx.fillText('Lesson 1: the hotspot', 540 + jx, 1520); ctx.globalAlpha = 1; }
+    ctx.fillStyle = '#7a5230'; ctx.fillRect(0, 1880, 1080, 40); ctx.fillStyle = '#f5f5f0'; ctx.fillRect(820, 1860, 90, 22);
+  } },
+  13: { name: 'Risograph print', note: 'Two spot inks, off-register, paper grain', draw(t) {
+    octx.save(); octx.clearRect(0, 0, 1080, 1920); sceneCollege(octx, t, 'SILICON VALLEY INSTITUTE OF TECHNOLOGY'); couple(octx, t); phoneGlow(octx, 540, 1060, t, .9); octx.restore();
+    ctx.fillStyle = '#f4eee0'; ctx.fillRect(0, 0, 1080, 1920);
+    const ink = (color, dx, dy, filt) => { small.width = 1080; small.height = 1920; sctx.fillStyle = color; sctx.fillRect(0, 0, 1080, 1920); sctx.globalCompositeOperation = 'screen'; sctx.filter = filt; sctx.drawImage(off, 0, 0); sctx.filter = 'none'; sctx.globalCompositeOperation = 'source-over';
+      ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(small, dx, dy); ctx.restore(); };
+    const wob = Math.sin(t * 2) * 2;
+    ink('#ff48b0', 6 + wob, 3, 'grayscale(1) contrast(1.6) brightness(1.15)');
+    ink('#0078bf', -6, -3 - wob, 'grayscale(1) contrast(2.2) brightness(1.35)');
+    ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = .25; for (let i = 0; i < 2500; i++) { ctx.fillStyle = '#5a4a3a'; ctx.fillRect(hash(i * 3.1) * 1080, hash(i * 7.7) * 1920, 2, 2); } ctx.restore();
+  } },
+  14: { name: 'Paper cut-out puppets', note: 'Layered paper, drop shadows, hinged 12 fps', draw(t) {
+    const ts = Math.floor(t * 12) / 12;
+    ctx.fillStyle = '#e9d8b4'; ctx.fillRect(0, 0, 1080, 1920);
+    const layer = (fn, depth) => { ctx.save(); ctx.shadowColor = 'rgba(60,35,20,.45)'; ctx.shadowBlur = 18; ctx.shadowOffsetX = 10 * depth; ctx.shadowOffsetY = 12 * depth; ctx.translate(Math.sin(ts * .8) * 10 * depth, 0); fn(); ctx.restore(); };
+    layer(() => { ctx.fillStyle = '#f6c453'; ctx.beginPath(); ctx.arc(820, 560, 120, 0, 7); ctx.fill(); }, .4);
+    layer(() => { ctx.fillStyle = '#8fbf6a'; ctx.beginPath(); ctx.moveTo(0, 1150); for (let x = 0; x <= 1080; x += 60) ctx.lineTo(x, 1050 - Math.sin(x / 140) * 90 + hash(x) * 14); ctx.lineTo(1080, 1920); ctx.lineTo(0, 1920); ctx.fill(); }, .6);
+    layer(() => { ctx.fillStyle = '#e88aa5'; ctx.fillRect(80, 760, 260, 420); ctx.fillStyle = '#7fb0e8'; ctx.fillRect(740, 740, 260, 440); }, .8);
+    layer(() => { ctx.fillStyle = '#6aa253'; ctx.fillRect(0, 1330, 1080, 600); }, 1);
+    octx.clearRect(0, 0, 1080, 1920);
+    const tilt = Math.sin(ts * 6) * .05;
+    octx.save(); octx.translate(380, 1380); octx.rotate(tilt); hero(octx, 0, 0, 1.0, CAST2.ishita, { t: ts, emo: 'happy', look: .8 }); octx.restore();
+    octx.save(); octx.translate(700, 1380); octx.rotate(-tilt); hero(octx, 0, 0, 1.0, CAST2.vihaan, { t: ts, emo: 'happy', look: -.8, pose: ts > .9 && ts < 2.4 ? 'wave' : undefined }); octx.restore();
+    phoneGlow(octx, 540, 1060, ts, .9);
+    ctx.save(); ctx.shadowColor = 'rgba(60,35,20,.5)'; ctx.shadowBlur = 14; ctx.shadowOffsetX = 14; ctx.shadowOffsetY = 16; ctx.drawImage(off, 0, 0); ctx.restore();
+    ctx.fillStyle = '#d4a017'; [[380, 1060], [700, 1050]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fill(); }); // brass split-pin hinges
+  } },
+  15: { name: 'Stick-figure doodle', note: 'Ballpoint pen on notebook paper', draw(t) {
+    ctx.fillStyle = '#fdfbf3'; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.strokeStyle = 'rgba(80,140,220,.35)'; ctx.lineWidth = 2; for (let y = 120; y < 1920; y += 56) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1080, y); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(230,80,80,.5)'; ctx.beginPath(); ctx.moveTo(110, 0); ctx.lineTo(110, 1920); ctx.stroke();
+    const f = Math.floor(t * 8), j = () => (hash(f * 13 + (++jc)) - .5) * 5; let jc = 0;
+    const pen = '#1d3fb3'; ctx.strokeStyle = pen; ctx.fillStyle = pen; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const line = (pts) => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x + j(), y + j()) : ctx.moveTo(x + j(), y + j()))); ctx.stroke(); };
+    const stick = (x, hair, waving) => { const b = Math.sin(t * 6 + x) * 6;
+      ctx.beginPath(); ctx.arc(x + j(), 980 + b, 70, 0, 7); ctx.stroke();
+      line([[x, 1050 + b], [x, 1260]]); line([[x, 1260], [x - 60, 1400]]); line([[x, 1260], [x + 60, 1400]]);
+      line([[x, 1110 + b], [x - 80, 1200]]); line(waving ? [[x, 1110 + b], [x + 70, 1040 + Math.sin(t * 14) * 30]] : [[x, 1110 + b], [x + 80, 1200]]);
+      ctx.beginPath(); ctx.arc(x - 22, 970 + b, 7, 0, 7); ctx.arc(x + 22, 970 + b, 7, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(x, 990 + b, 26, .2, Math.PI - .2); ctx.stroke();
+      if (hair) { line([[x - 70, 960], [x - 80, 1150]]); line([[x + 70, 960], [x + 76, 1120]]); } else line([[x - 50, 925], [x - 30, 890], [x - 5, 920], [x + 20, 885], [x + 45, 920]]); };
+    stick(360, true, false); stick(720, false, t > .9 && t < 2.4);
+    ctx.lineWidth = 6; [20, 38, 56].forEach(r => { ctx.beginPath(); ctx.arc(540 + j(), 1150, r, -Math.PI * .78, -Math.PI * .22); ctx.stroke(); });
+    ctx.font = '700 54px Fredoka'; ctx.textAlign = 'center'; ctx.fillText('her!', 300, 820); ctx.fillText('him!', 780, 820);
+    line([[300, 840], [330, 880]]); line([[780, 840], [750, 880]]);
+    if (t > 1.6) { ctx.fillText('wifi = love??', 560, 1560); }
+  } },
+  16: { name: 'Neon sign', note: 'Glowing tubes flicker on, brick wall', draw(t) {
+    ctx.fillStyle = '#2a1414'; ctx.fillRect(0, 0, 1080, 1920);
+    for (let r = 0; r < 40; r++) for (let c = 0; c < 9; c++) { ctx.fillStyle = `rgb(${70 + hash(r * 9 + c) * 25},${32 + hash(r + c) * 10},${30})`; ctx.fillRect(c * 124 + (r % 2 ? 62 : 0) - 62, r * 50, 118, 44); }
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, 1080, 1920);
+    const on = (at, id) => { if (t < at) return 0; const ft = t - at; return ft < .35 ? (hash(Math.floor(t * 24) + id) > .45 ? 1 : .15) : 1; };
+    const tube = (col, k, fn) => { if (k <= 0) return; ctx.save(); ctx.globalAlpha = k; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.shadowColor = col; ctx.shadowBlur = 40; ctx.strokeStyle = col; ctx.lineWidth = 14; fn(); ctx.stroke(); ctx.shadowBlur = 0; ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; fn(); ctx.stroke(); ctx.restore(); };
+    tube('#ff3ea5', on(.1, 1), () => { ctx.beginPath(); ctx.arc(340, 900, 90, 0, 7); ctx.moveTo(250, 860); ctx.quadraticCurveTo(240, 1060, 280, 1120); ctx.moveTo(430, 860); ctx.quadraticCurveTo(440, 1060, 400, 1120); ctx.moveTo(340, 990); ctx.lineTo(340, 1240); ctx.moveTo(250, 1240); ctx.lineTo(430, 1240); });
+    tube('#3ee6ff', on(.5, 2), () => { ctx.beginPath(); ctx.arc(740, 900, 90, 0, 7); ctx.moveTo(660, 840); ctx.lineTo(690, 790); ctx.lineTo(720, 830); ctx.lineTo(750, 780); ctx.lineTo(790, 830); ctx.moveTo(740, 990); ctx.lineTo(740, 1240); ctx.moveTo(650, 1240); ctx.lineTo(830, 1240); });
+    tube('#ffd23f', on(1.1, 3), () => { ctx.beginPath(); [40, 75, 110].forEach(r => { ctx.moveTo(540 + Math.cos(-Math.PI * .78) * r, 1100 + Math.sin(-Math.PI * .78) * r); ctx.arc(540, 1100, r, -Math.PI * .78, -Math.PI * .22); }); });
+    tube('#ff3ea5', on(1.7, 4), () => { ctx.font = '700 120px Fredoka'; ctx.textAlign = 'center'; ctx.beginPath(); });
+    const k = on(1.7, 4); if (k > 0) { ctx.save(); ctx.globalAlpha = k; ctx.font = '700 120px Fredoka'; ctx.textAlign = 'center'; ctx.shadowColor = '#ff3ea5'; ctx.shadowBlur = 40; ctx.strokeStyle = '#ff3ea5'; ctx.lineWidth = 10; ctx.strokeText('HOTSPOT ON', 540, 1460); ctx.fillStyle = '#ffd6ee'; ctx.fillText('HOTSPOT ON', 540, 1460); ctx.restore(); }
+  } },
+  17: { name: 'Flat motion design', note: 'Geometric shapes, long shadows, springy pops', draw(t) {
+    ctx.fillStyle = '#ffe5d9'; ctx.fillRect(0, 0, 1080, 1920);
+    [[200, 600, 260, '#ffcad4'], [900, 1100, 340, '#d8e2ff'], [540, 1500, 420, '#fff1b8']].forEach(([x, y, r, c], i) => { const k = ease.back(prog(t, i * .1, .4)); ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r * k, 0, 7); ctx.fill(); });
+    const longShadow = (fn) => { ctx.save(); ctx.fillStyle = 'rgba(120,60,60,.14)'; for (let i = 1; i < 30; i++) { ctx.save(); ctx.translate(i * 6, i * 6); fn(true); ctx.restore(); } ctx.restore(); fn(false); };
+    const person = (x, body, head, hair, at, waving) => { const k = ease.back(prog(t, at, .45)), b = Math.sin(t * 5 + x) * 6;
+      longShadow(sh => { ctx.save(); ctx.translate(x, 1300 + b); ctx.scale(k, k); if (!sh) ctx.fillStyle = body; ctx.beginPath(); ctx.roundRect(-90, -300, 180, 300, 90); ctx.fill(); if (!sh) ctx.fillStyle = head; ctx.beginPath(); ctx.arc(0, -390, 95, 0, 7); ctx.fill();
+        if (!sh) { ctx.fillStyle = hair; ctx.beginPath(); ctx.arc(0, -410, 98, Math.PI, 0); ctx.fill(); ctx.fillStyle = '#1d1a2e'; ctx.beginPath(); ctx.arc(-32, -380, 10, 0, 7); ctx.arc(32, -380, 10, 0, 7); ctx.fill(); }
+        if (waving && !sh) { ctx.fillStyle = body; ctx.save(); ctx.translate(80, -260); ctx.rotate(-2.2 + Math.sin(t * 12) * .3); ctx.beginPath(); ctx.roundRect(-20, 0, 40, 160, 20); ctx.fill(); ctx.restore(); } ctx.restore(); }); };
+    person(360, '#ff6f91', '#f0c19c', '#2a1a17', .2, false); person(720, '#4f8ff7', '#d29a72', '#1c1311', .35, t > .9 && t < 2.4);
+    const pk = ease.back(prog(t, .7, .4)); ctx.save(); ctx.translate(540, 1040); ctx.scale(pk, pk); ctx.fillStyle = '#1d1a2e'; ctx.beginPath(); ctx.roundRect(-45, -80, 90, 160, 16); ctx.fill(); ctx.fillStyle = '#7dd3fc'; ctx.fillRect(-35, -65, 70, 130); ctx.restore();
+    [0, 1, 2].forEach(i => { const p = ((t * .9 + i / 3) % 1); ctx.strokeStyle = `rgba(255,93,143,${1 - p})`; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(540, 1040, 60 + p * 260, 0, 7); ctx.stroke(); });
+  } },
+  18: { name: 'Pop-up book', note: 'Paper figures fold up off the pages', draw(t) {
+    ctx.fillStyle = '#5b3a29'; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.fillStyle = '#7a4e36'; ctx.beginPath(); ctx.roundRect(40, 600, 1000, 1180, 30); ctx.fill();
+    const page = (x0, x1) => { const g = ctx.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, '#fbf3e1'); g.addColorStop(1, '#e9dcc0'); ctx.fillStyle = g; ctx.fillRect(Math.min(x0, x1), 640, Math.abs(x1 - x0), 1100); };
+    page(80, 540); page(1000, 540); ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(530, 640, 20, 1100);
+    const fold = (k, fn) => { ctx.save(); ctx.translate(0, 1500); ctx.scale(1, Math.max(.02, k)); ctx.transform(1, 0, -(1 - k) * .6, 1, 0, 0); ctx.translate(0, -1500); fn(); ctx.restore(); ctx.save(); ctx.globalAlpha = .25 * k; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(540, 1510, 420 * k, 30, 0, 0, 7); ctx.fill(); ctx.restore(); };
+    fold(ease.out(prog(t, 0, .7)), () => { ctx.fillStyle = '#f7b6c8'; ctx.fillRect(150, 1050, 280, 450); ctx.fillStyle = '#a9cbff'; ctx.fillRect(650, 1030, 280, 470); });
+    fold(ease.back(prog(t, .5, .7)), () => { hero(ctx, 400, 1500, .95, CAST2.ishita, { t, emo: 'happy', look: .8 }); hero(ctx, 690, 1500, .95, CAST2.vihaan, { t, emo: 'happy', look: -.8, pose: t > 1.2 && t < 2.6 ? 'wave' : undefined }); });
+    fold(ease.back(prog(t, 1.0, .5)), () => phoneGlow(ctx, 545, 1200, t, .9));
+    ctx.fillStyle = '#3a2618'; ctx.font = '700 46px Fredoka'; ctx.textAlign = 'center'; ctx.fillText('Chapter 1 · Two Strangers', 540, 720);
+  } },
+  20: { name: 'Mosaic tiles', note: 'The scene built from hexagon tiles', draw(t) {
+    octx.save(); octx.clearRect(0, 0, 1080, 1920); sceneTown(octx, t * .3); couple(octx, t); phoneGlow(octx, 540, 1060, t, .9); octx.restore();
+    const R = 22, w = Math.sqrt(3) * R, sw = Math.ceil(1080 / w) + 2, sh = Math.ceil(1920 / (R * 1.5)) + 2;
+    small.width = sw; small.height = sh; sctx.imageSmoothingEnabled = true; sctx.drawImage(off, 0, 0, sw, sh); const d = sctx.getImageData(0, 0, sw, sh).data;
+    ctx.fillStyle = '#3b3a3a'; ctx.fillRect(0, 0, 1080, 1920);
+    for (let r = 0; r < sh; r++) for (let c = 0; c < sw; c++) { const i = (r * sw + c) * 4, x = c * w + (r % 2 ? w / 2 : 0), y = r * R * 1.5, sh2 = 1 + (hash(r * 999 + c) - .5) * .12;
+      ctx.fillStyle = `rgb(${d[i] * sh2},${d[i + 1] * sh2},${d[i + 2] * sh2})`; ctx.beginPath(); for (let k = 0; k < 6; k++) { const a = Math.PI / 6 + k * Math.PI / 3; ctx.lineTo(x + Math.cos(a) * (R - 2), y + Math.sin(a) * (R - 2)); } ctx.fill(); }
   } },
 };
 
