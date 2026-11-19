@@ -35,10 +35,44 @@ const h = fn => async (req, res) => {
 const bad = msg => Object.assign(new Error(msg), { status: 400 });
 
 // ---------- project ----------
+// sections added after v1 get defaults here so older project files keep working
+const DOC_DEFAULTS = {
+  plan: { items: [] },
+  calendar: [],
+  world: { relations: [
+    { a: 'ishita', b: 'vihaan', label: 'strangers → lifetime partners' }, { a: 'ishita', b: 'zoya', label: 'roommate & best friend' },
+    { a: 'ishita', b: 'tanvi', label: 'classmate (borrowed the hotspot)' }, { a: 'ishita', b: 'appa', label: 'father' }, { a: 'ishita', b: 'amma', label: 'mother' },
+  ] },
+  profiles: {
+    instagram: { handle: '', displayName: 'Strangers to Forever', bio: 'Our love story, one reel at a time 💕\nFrom strangers in engineering college to forever\n👇 Start from Part 1', link: '', checklist: {} },
+    youtube: { handle: '', displayName: 'Strangers to Forever', bio: 'An animated Hinglish love story told in Shorts. From strangers to lifetime partners. New part every few days. Subscribe 🔔', link: '', checklist: {} },
+    facebook: { handle: '', displayName: '', bio: '', link: '', checklist: {} },
+    moj: { handle: '', displayName: '', bio: '', link: '', checklist: {} },
+  },
+  stats: [],
+  style: {
+    captionTemplates: [
+      { id: 't1', name: 'Hook + question', text: '{hook} 💕 Part {num} of our story. {question} 👇' },
+      { id: 't2', name: 'POV', text: 'POV: {hook} 😭 Part {num}. Would you have done the same? 👇' },
+      { id: 't3', name: 'Callback', text: 'Last part: {previous}… aaj kuch aur hua 👀 Part {num}' },
+    ],
+    hashtagSets: [
+      { id: 'h1', name: 'Core series', tags: ['StrangersToForever', 'lovestory', 'animatedstory', 'hinglishstory', 'reels'] },
+      { id: 'h2', name: 'College love', tags: ['collegelove', 'engineeringlove', 'collegelovestory', 'hostellife', 'bangalorelove'] },
+      { id: 'h3', name: 'Romance reach', tags: ['couplegoals', 'strangerstolovers', 'lovestorytime', 'cutecouple', 'trendingreels'] },
+    ],
+  },
+};
+const withDefaults = p => { for (const [k, v] of Object.entries(DOC_DEFAULTS)) if (p[k] === undefined) p[k] = JSON.parse(JSON.stringify(v)); return p; };
 app.get('/api/project', h(() => {
   const p = load(); if (!p) throw Object.assign(new Error('No project yet. Run: npm run seed'), { status: 404 });
-  return { ...p, moods: MOODS, platforms: PLATFORMS, variants: VARIANTS };
+  return { ...withDefaults(p), moods: MOODS, platforms: PLATFORMS, variants: VARIANTS };
 }));
+app.put('/api/doc/:key', h(req => {
+  if (!(req.params.key in DOC_DEFAULTS)) throw bad('unknown section');
+  return update(p => { withDefaults(p); p[req.params.key] = req.body; return p[req.params.key]; });
+}));
+app.get('/api/backup', (req, res) => { res.set('Content-Disposition', `attachment; filename="studio-backup-${new Date().toISOString().slice(0, 10)}.json"`); res.json(withDefaults(load())); });
 app.put('/api/series', h(req => update(p => { p.series = { ...p.series, ...req.body }; return p.series; })));
 
 // generic CRUD for list collections

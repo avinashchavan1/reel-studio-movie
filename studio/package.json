@@ -7,7 +7,9 @@
     "dev": "concurrently -k -n api,web -c magenta,cyan \"node --watch-path=server server/index.js\" \"vite\"",
     "build": "tsc && vite build",
     "start": "node server/index.js",
-    "seed": "node server/seed.js"
+    "seed": "node server/seed.js",
+    "prune": "node server/prune.js",
+    "hub": "node --no-warnings server/hub.js --deploy"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

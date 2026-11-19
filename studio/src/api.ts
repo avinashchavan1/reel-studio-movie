@@ -18,13 +18,21 @@ export type Place = { id: string; name: string; scene: string; description: stri
 export type Story = { id: string; createdAt: string; text: string; tags: string[]; replaced: string[]; status: string };
 export type ClaudeRequest = { id: string; createdAt: string; kind: string; storyIds: string[]; episodeId: string | null; note: string; status: string; result?: string };
 export type KB = { id: string; title: string; tags: string[]; body: string };
+export type PlanItem = { id: string; num: number; title: string; beats: string; status: 'idea' | 'planned' | 'production' | 'done'; episodeId?: string; hook?: string };
+export type CalSlot = { id: string; date: string; platform: string; episodeNum?: number; note?: string };
+export type Profile = { handle: string; displayName: string; bio: string; link: string; checklist: Record<string, boolean> };
+export type Stat = { id: string; date: string; platform: string; followers: number; views: number };
 export type Project = {
   series: { title: string; tagline: string; language: string; handle: string; hashtags: string[]; musicStyle: string[] };
   characters: Character[]; places: Place[]; stories: Story[]; claudeRequests: ClaudeRequest[]; knowledge: KB[]; episodes: Episode[];
   moods: Record<string, { label: string; styles: string[] }>;
   platforms: Record<string, { name: string; mode: 'api' | 'export' }>;
   variants: Record<string, { label: string; cta: string; color: string }>;
+  plan: { items: PlanItem[] }; calendar: CalSlot[]; world: { relations: { a: string; b: string; label: string }[] };
+  profiles: Record<string, Profile>; stats: Stat[];
+  style: { captionTemplates: { id: string; name: string; text: string }[]; hashtagSets: { id: string; name: string; tags: string[] }[] };
 };
+export const saveDoc = (key: string, value: unknown) => api(`/doc/${key}`, { method: 'PUT', body: value });
 export type Job = { id: string; kind: string; label: string; status: 'queued' | 'running' | 'done' | 'error'; progress: number; error?: string; createdAt: number; result?: any };
 
 export async function api<T = any>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {

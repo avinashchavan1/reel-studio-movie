@@ -1,5 +1,6 @@
 import { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
+import { useSearchParams } from 'react-router-dom';
 import { Loader2, Pause, Play } from 'lucide-react';
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'soft' | 'danger'; loading?: boolean; icon?: ReactNode; size?: 'sm' | 'md' };
@@ -84,4 +85,36 @@ export function Markdown({ text }: { text: string }) {
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-100">$1</strong>')
     .split('\n').map(l => /^\s*[-•]\s+/.test(l) ? `<li class="ml-4 list-disc">${l.replace(/^\s*[-•]\s+/, '')}</li>` : /^\s*\d+\.\s+/.test(l) ? `<li class="ml-4 list-decimal">${l.replace(/^\s*\d+\.\s+/, '')}</li>` : l ? `<p>${l}</p>` : '<div class="h-2"></div>').join('');
   return <div className="text-sm text-zinc-300 leading-relaxed space-y-1" dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+// Tabs synced to ?tab= so links can open a specific tab
+export function useTab(def: string) {
+  const [sp, setSp] = useSearchParams();
+  return [sp.get('tab') || def, (t: string) => { const n = new URLSearchParams(sp); n.set('tab', t); setSp(n, { replace: true }); }] as const;
+}
+export function Tabs({ tabs, value, onChange }: { tabs: { id: string; label: string; icon?: ReactNode; count?: number }[]; value: string; onChange: (id: string) => void }) {
+  return (
+    <div className="flex gap-1 overflow-x-auto rounded-2xl bg-white/[.03] ring-1 ring-white/[.06] p-1 mb-6 w-fit max-w-full">
+      {tabs.map(t => (
+        <button key={t.id} onClick={() => onChange(t.id)}
+          className={clsx('flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm whitespace-nowrap transition', value === t.id ? 'bg-gradient-to-r from-pink-500/25 to-violet-500/15 text-white ring-1 ring-pink-500/30' : 'text-zinc-400 hover:text-zinc-100')}>
+          {t.icon}{t.label}{t.count !== undefined && <span className="rounded-full bg-white/10 px-1.5 text-[10px]">{t.count}</span>}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// tiny SVG line chart
+export function Sparkline({ points, color = '#ec4899', height = 60 }: { points: number[]; color?: string; height?: number }) {
+  if (points.length < 2) return <div className="text-xs text-zinc-500" style={{ height }}>Add at least two entries to see a trend.</div>;
+  const max = Math.max(...points), min = Math.min(...points), w = 300;
+  const xy = points.map((v, i) => [(i / (points.length - 1)) * w, height - 6 - ((v - min) / Math.max(1, max - min)) * (height - 12)]);
+  const d = xy.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  return (
+    <svg viewBox={`0 0 ${w} ${height}`} className="w-full" style={{ height }} preserveAspectRatio="none">
+      <path d={`${d} L${w},${height} L0,${height} Z`} fill={color} opacity=".12" />
+      <path d={d} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
 }

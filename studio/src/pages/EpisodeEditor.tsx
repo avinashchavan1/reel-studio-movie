@@ -50,7 +50,7 @@ export default function EpisodeEditor({ p }: { p: Project }) {
   const running = (jobs || []).filter(j => (j.status === 'running' || j.status === 'queued') && j.label.includes(`Ep ${ep?.num}`));
   const timing = useMemo(() => Object.fromEntries((analysis?.shots || []).map(s => [s.id, s])), [analysis]);
 
-  if (!ep) return <div className="text-zinc-400">Episode not found. <Link className="text-pink-300" to="/episodes">Back</Link></div>;
+  if (!ep) return <div className="text-zinc-400">Episode not found. <Link className="text-pink-300" to="/reels">Back</Link></div>;
   const renders = ep.renders || (ep.render ? { instagram: ep.render } : {});
   const shownCut = renders[cut] || Object.values(renders)[0];
   const unvoiced = ep.shots.reduce((a, s) => a + s.lines.filter(l => !l.audio || l.audio.text !== l.text).length, 0);
@@ -58,7 +58,7 @@ export default function EpisodeEditor({ p }: { p: Project }) {
   return (
     <>
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <Button variant="ghost" onClick={() => nav('/episodes')} icon={<ArrowLeft className="size-4" />} />
+        <Button variant="ghost" onClick={() => nav('/reels')} icon={<ArrowLeft className="size-4" />} />
         <span className="text-sm text-zinc-400">Ep</span>
         <Input type="number" className="!w-16" value={ep.num} onChange={e => change(d => { d.num = Number(e.target.value); })} />
         <Input className="!w-auto flex-1 min-w-48 text-lg font-semibold" value={ep.title} onChange={e => change(d => { d.title = e.target.value; })} />
@@ -122,7 +122,7 @@ export default function EpisodeEditor({ p }: { p: Project }) {
           {stills.length > 0 && <Card title="Frames" actions={<Button size="sm" variant="ghost" onClick={() => setStills([])}>Hide</Button>}><div className="grid grid-cols-4 gap-1.5">{stills.map(s => <a key={s} href={s} target="_blank"><img src={s} className="rounded-md" /></a>)}</div></Card>}
 
           {shownCut && (
-            <Card title="Latest render" subtitle={new Date(shownCut.at).toLocaleString()} actions={<Link to={`/publish/${ep.id}`}><Button size="sm" variant="primary" icon={<Send className="size-3.5" />}>Publish</Button></Link>}>
+            <Card title="Latest render" subtitle={new Date(shownCut.at).toLocaleString()} actions={<Link to={`/reels/${ep.id}?tab=publish`}><Button size="sm" variant="primary" icon={<Send className="size-3.5" />}>Publish</Button></Link>}>
               <div className="flex gap-1 mb-2">{Object.keys(renders).map(v => <Button key={v} size="sm" variant={cut === v ? 'primary' : 'ghost'} onClick={() => setCut(v)}>{p.variants[v]?.label || v}</Button>)}</div>
               <video key={shownCut.url} src={shownCut.url} poster={shownCut.poster} controls playsInline className="w-full rounded-xl aspect-[9/16] bg-black" />
               <a href={shownCut.url} download className="text-xs text-pink-300 mt-2 inline-block">Download MP4</a>

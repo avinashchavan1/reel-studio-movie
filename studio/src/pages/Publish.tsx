@@ -9,7 +9,7 @@ const BEST_TIMES = ['Today 7:30 PM', 'Today 1:00 PM', 'Tomorrow 7:30 PM'];
 function suggestTime(i: number) { const d = new Date(); if (i === 1) d.setHours(13, 0, 0, 0); else { d.setHours(19, 30, 0, 0); if (i === 2) d.setDate(d.getDate() + 1); } if (d < new Date()) d.setDate(d.getDate() + 1); return d; }
 const toLocalInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 
-function HubCard() {
+export function HubCard() {
   const { data: hub } = useQuery({ queryKey: ['hub'], queryFn: () => api<{ url: string | null; lastDeploy: string | null; pin: boolean }>('/hub') });
   const [pin, setPin] = useState('');
   const deploy = useAct(() => api('/hub/deploy', { body: { pin: pin || undefined } }), { success: 'Updating Publish Hub…', invalidate: ['jobs', 'hub'] });
@@ -43,12 +43,24 @@ export default function Publish({ p }: { p: Project }) {
   return (
     <>
       <PageHeader title="Publish" subtitle="One click to Instagram and YouTube, or schedule it. Export packs for every other app."
-        actions={<Select className="!w-64" value={ep.id} onChange={e => nav(`/publish/${e.target.value}`)} options={p.episodes.map(e => ({ value: e.id, label: `Ep ${e.num} · ${e.title}` }))} />} />
+        actions={<Select className="!w-64" value={ep.id} onChange={e => nav(`/reels/${e.target.value}?tab=publish`)} options={p.episodes.map(e => ({ value: e.id, label: `Ep ${e.num} · ${e.title}` }))} />} />
       <div className="grid lg:grid-cols-[1fr_340px] gap-4">
         <div className="space-y-4">
           <Card title="Caption & metadata" actions={<Button size="sm" onClick={() => saveMeta.mutate()} loading={saveMeta.isPending}>Save</Button>}>
             <div className="space-y-3">
               <Field label="Caption" hint="Hook line + context + a question. The platform CTA is added automatically."><Textarea rows={4} value={d.caption} onChange={e => setD({ ...d, caption: e.target.value })} /></Field>
+              <div className="flex flex-wrap gap-1.5 -mt-1">
+                <span className="text-[11px] text-zinc-500 mr-1 self-center">Templates:</span>
+                {p.style.captionTemplates.map(t => <Button key={t.id} size="sm" variant="ghost" onClick={() => {
+                  const hook = ep.shots.find(s => s.template === 'hook')?.params?.hook || ep.title;
+                  setD({ ...d, caption: t.text.replace('{hook}', hook).replace('{num}', String(ep.num)).replace('{question}', 'Aap kya karte? 👇').replace('{previous}', p.episodes.find(e => e.num === ep.num - 1)?.title || '') });
+                }}>{t.name}</Button>)}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                <span className="text-[11px] text-zinc-500 mr-1 self-center">Hashtag sets:</span>
+                {p.style.hashtagSets.map(h => <Button key={h.id} size="sm" variant="ghost" onClick={() => setD({ ...d, hashtags: [...new Set([...d.hashtags, ...h.tags])].slice(0, 12) })}>+ {h.name}</Button>)}
+                {d.hashtags.length > 0 && <Button size="sm" variant="danger" onClick={() => setD({ ...d, hashtags: [] })}>Clear</Button>}
+              </div>
               <Field label="Hashtags (5–12)" hint={`${d.hashtags.length} tags`}><Input value={d.hashtags.map(h => '#' + h).join(' ')} onChange={e => setD({ ...d, hashtags: e.target.value.split(/[\s,#]+/).filter(Boolean) })} /></Field>
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="Instagram CTA"><Input value={cta('instagram')} onChange={e => setD({ ...d, cta: { ...(d.cta || {}), instagram: e.target.value } })} /></Field>
@@ -65,7 +77,7 @@ export default function Publish({ p }: { p: Project }) {
                   <input type="checkbox" className="accent-pink-500" checked={platforms.includes(k)} onChange={() => setPlatforms(s => s.includes(k) ? s.filter(x => x !== k) : [...s, k])} />
                   {k === 'youtube' ? <Youtube className="size-4 text-red-400" /> : k === 'instagram' ? <Instagram className="size-4 text-pink-400" /> : <Send className="size-4 text-zinc-400" />}
                   <span className="text-sm flex-1">{pl.name}</span>
-                  {pl.mode === 'api' ? (ready(k) ? <Badge tone="done">connected</Badge> : <Link to="/settings" className="text-[11px] text-amber-300">connect →</Link>) : <Badge>export pack</Badge>}
+                  {pl.mode === 'api' ? (ready(k) ? <Badge tone="done">connected</Badge> : <Link to="/profiles" className="text-[11px] text-amber-300">connect →</Link>) : <Badge>export pack</Badge>}
                 </label>
               ))}
             </div>
@@ -95,7 +107,6 @@ export default function Publish({ p }: { p: Project }) {
           </Card>
         </div>
         <div className="space-y-4">
-          <HubCard />
           {Object.entries(ep.renders || (ep.render ? { instagram: ep.render } : {})).map(([v, r]) => (
             <Card key={v} title={`${p.variants[v]?.label || v} cut`} subtitle={`Ends with ${p.variants[v]?.cta || 'FOLLOW'}`}>
               <video src={r.url} poster={r.poster} controls playsInline className="w-full rounded-xl aspect-[9/16] bg-black" />

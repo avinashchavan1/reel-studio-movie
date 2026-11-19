@@ -1,31 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import clsx from 'clsx';
-import { BookOpen, Clapperboard, Film, Inbox, LayoutDashboard, Map, Menu, Mic2, Send, Settings as SettingsIcon, Sparkles, Users, X } from 'lucide-react';
+import { AtSign, BookOpen, CalendarRange, Clapperboard, Film, LayoutDashboard, Menu, Settings as SettingsIcon, Sparkles, Users, X } from 'lucide-react';
 import { useCredits, useJobs, useProject } from './api';
 import { Progress } from './components/ui';
 import Dashboard from './pages/Dashboard';
-import StoryInbox from './pages/StoryInbox';
-import Episodes from './pages/Episodes';
-import EpisodeEditor from './pages/EpisodeEditor';
-import Cast from './pages/Cast';
-import Places from './pages/Places';
-import Voices from './pages/Voices';
-import Publish from './pages/Publish';
-import Knowledge from './pages/Knowledge';
+import Reels from './pages/Reels';
+import ReelDetail from './pages/ReelDetail';
+import Plan from './pages/Plan';
+import World from './pages/World';
+import Profiles from './pages/Profiles';
+import StyleDocs from './pages/StyleDocs';
 import Settings from './pages/Settings';
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/inbox', label: 'Story Inbox', icon: Inbox },
-  { to: '/episodes', label: 'Episodes', icon: Film },
-  { to: '/cast', label: 'Cast', icon: Users },
-  { to: '/places', label: 'Places', icon: Map },
-  { to: '/voices', label: 'Voice Lab', icon: Mic2 },
-  { to: '/publish', label: 'Publish', icon: Send },
-  { to: '/knowledge', label: 'Knowledge', icon: BookOpen },
+  { to: '/reels', label: 'Reels', icon: Film },
+  { to: '/plan', label: 'Plan', icon: CalendarRange },
+  { to: '/world', label: 'Cast & World', icon: Users },
+  { to: '/profiles', label: 'Profiles', icon: AtSign },
+  { to: '/style', label: 'Style & Docs', icon: BookOpen },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 
@@ -80,7 +76,7 @@ export default function App() {
           {NAV.map(n => (
             <NavLink key={n.to} to={n.to} end={n.to === '/'} className={({ isActive }) => clsx('flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition', isActive ? 'bg-gradient-to-r from-pink-500/20 to-violet-500/10 text-white ring-1 ring-pink-500/20' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[.04]')}>
               <n.icon className="size-4" />{n.label}
-              {n.to === '/inbox' && pending > 0 && <span className="ml-auto rounded-full bg-amber-500/20 text-amber-300 text-[10px] px-1.5">{pending}</span>}
+              {n.to === '/plan' && pending > 0 && <span className="ml-auto rounded-full bg-amber-500/20 text-amber-300 text-[10px] px-1.5">{pending}</span>}
             </NavLink>
           ))}
         </nav>
@@ -99,16 +95,21 @@ export default function App() {
           {error ? <div className="text-rose-300">Can't reach the studio server: {(error as Error).message}</div> : !project ? <div className="text-zinc-400">Loading studio…</div> : (
             <Routes>
               <Route path="/" element={<Dashboard p={project} />} />
-              <Route path="/inbox" element={<StoryInbox p={project} />} />
-              <Route path="/episodes" element={<Episodes p={project} />} />
-              <Route path="/episodes/:id" element={<EpisodeEditor p={project} />} />
-              <Route path="/cast" element={<Cast p={project} />} />
-              <Route path="/places" element={<Places p={project} />} />
-              <Route path="/voices" element={<Voices p={project} />} />
-              <Route path="/publish" element={<Publish p={project} />} />
-              <Route path="/publish/:id" element={<Publish p={project} />} />
-              <Route path="/knowledge" element={<Knowledge p={project} />} />
+              <Route path="/reels" element={<Reels p={project} />} />
+              <Route path="/reels/:id" element={<ReelDetail p={project} />} />
+              <Route path="/plan" element={<Plan p={project} />} />
+              <Route path="/world" element={<World p={project} />} />
+              <Route path="/profiles" element={<Profiles p={project} />} />
+              <Route path="/style" element={<StyleDocs p={project} />} />
               <Route path="/settings" element={<Settings p={project} />} />
+              {/* old links */}
+              <Route path="/episodes/:id" element={<ReelDetail p={project} />} />
+              <Route path="/episodes" element={<Navigate to="/reels" replace />} />
+              <Route path="/inbox" element={<Navigate to="/plan?tab=inbox" replace />} />
+              <Route path="/cast" element={<Navigate to="/world" replace />} />
+              <Route path="/voices" element={<Navigate to="/world?tab=voices" replace />} />
+              <Route path="/knowledge" element={<Navigate to="/style" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           )}
         </div>
