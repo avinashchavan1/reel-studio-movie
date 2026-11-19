@@ -12,6 +12,7 @@ import { scanEpisode } from './privacy.js';
 import { elevenlabs, MOODS } from './audio.js';
 import { PLATFORMS, integrationStatus } from './publish.js';
 import { VARIANTS } from './render.js';
+import { stageOf } from './stage.js';
 
 const OUT = path.join(ROOT, 'studio-dist');
 const CFG = path.join(DATA, 'studio-site.json'); // committed: site id + url (not secret)
@@ -31,7 +32,8 @@ export async function buildStudioSite() {
   const p = load();
   const snap = path.join(OUT, 'snapshot'); fs.mkdirSync(snap, { recursive: true });
   const w = (name, data) => fs.writeFileSync(path.join(snap, name + '.json'), JSON.stringify(data));
-  const project = { ...p, moods: MOODS, platforms: PLATFORMS, variants: VARIANTS };
+  const project = { ...p, episodes: p.episodes.map(e => ({ ...e, code: `STF-${String(e.num).padStart(2, '0')}`, stage: stageOf(e) })), moods: MOODS, platforms: PLATFORMS, variants: VARIANTS };
+  for (const [k, v] of Object.entries({ notes: '', activity: [] })) if (project[k] === undefined) project[k] = v;
   for (const k of ['plan', 'calendar', 'world', 'profiles', 'stats', 'style']) if (project[k] === undefined) project[k] = k === 'calendar' || k === 'stats' ? [] : k === 'plan' ? { items: [] } : k === 'world' ? { relations: [] } : {};
   if (!project.style.captionTemplates) project.style = { captionTemplates: [], hashtagSets: [] };
   w('project', project);
@@ -43,7 +45,7 @@ export async function buildStudioSite() {
   const pinHash = priv.read('hub', {}).pinHash || null;
   w('hub', { url: hubCfg.url || null, lastDeploy: hubCfg.lastDeploy || null, pin: !!pinHash });
   w('pin', { pin: pinHash });
-  for (const d of ['renders', 'audio', 'music']) if (fs.existsSync(path.join(MEDIA, d))) cp(path.join(MEDIA, d), path.join(OUT, 'media', d));
+  for (const d of ['renders', 'audio', 'music', 'brand']) if (fs.existsSync(path.join(MEDIA, d))) cp(path.join(MEDIA, d), path.join(OUT, 'media', d));
   for (const e of ['engine.js', 'engine2.js', 'scenes2.js']) cp(path.join(REPO, 'engine', e), path.join(OUT, 'engine', e));
   cp(path.join(REPO, 'fonts'), path.join(OUT, 'fonts'));
   fs.writeFileSync(path.join(OUT, '_redirects'), '/*  /index.html  200\n');

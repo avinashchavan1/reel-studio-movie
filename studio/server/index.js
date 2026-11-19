@@ -7,6 +7,7 @@ import { anonymize, findLeaks, getNameMap, setNameMap, scanEpisode } from './pri
 import { elevenlabs, duration, envelope, MOODS } from './audio.js';
 import { buildTimeline, musicPlan, enqueue, jobs, renderEpisode, VARIANTS } from './render.js';
 import { viralReport } from './viral.js';
+import { stageOf } from './stage.js';
 import { PLATFORMS, getSettings, setSettings, integrationStatus, youtubeAuthUrl, youtubeCallback, publishTo, exportPack } from './publish.js';
 
 const PORT = Number(process.env.PORT || process.env.STUDIO_PORT || 5174);
@@ -37,6 +38,10 @@ const bad = msg => Object.assign(new Error(msg), { status: 400 });
 // ---------- project ----------
 // sections added after v1 get defaults here so older project files keep working
 const DOC_DEFAULTS = {
+  notes: '',
+  activity: [],
+  brand: { channel: 'Strangers to Forever', series: 'Strangers to Forever', edition: 'Season 1 · College days', tagline: 'From strangers to lifetime partners', cta: 'Follow for the next part 💕',
+    palette: ['#ff8fab', '#6ea8fe', '#b69cff', '#0b1a7a', '#ffc93c'], loudness: '-14 LUFS (Instagram / YouTube)', category: 'Digital creator', keywords: ['love story', 'animated story', 'college love', 'hinglish story', 'engineering love', 'bangalore'], playlist: 'Strangers to Forever (in order)' },
   plan: { items: [] },
   calendar: [],
   world: { relations: [
@@ -64,14 +69,31 @@ const DOC_DEFAULTS = {
   },
 };
 const withDefaults = p => { for (const [k, v] of Object.entries(DOC_DEFAULTS)) if (p[k] === undefined) p[k] = JSON.parse(JSON.stringify(v)); return p; };
+const logActivity = (p, text) => { p.activity = [{ at: new Date().toISOString(), text }, ...(p.activity || [])].slice(0, 200); };
 app.get('/api/project', h(() => {
   const p = load(); if (!p) throw Object.assign(new Error('No project yet. Run: npm run seed'), { status: 404 });
-  return { ...withDefaults(p), moods: MOODS, platforms: PLATFORMS, variants: VARIANTS };
+  withDefaults(p);
+  const episodes = p.episodes.map(e => ({ ...e, code: `STF-${String(e.num).padStart(2, '0')}`, stage: stageOf(e) }));
+  return { ...p, episodes, moods: MOODS, platforms: PLATFORMS, variants: VARIANTS };
 }));
 app.put('/api/doc/:key', h(req => {
   if (!(req.params.key in DOC_DEFAULTS)) throw bad('unknown section');
   return update(p => { withDefaults(p); p[req.params.key] = req.body; return p[req.params.key]; });
 }));
+// review gate + posting status + plan ideas
+app.post('/api/episodes/:id/review', h(req => update(p => { withDefaults(p); const ep = findEpisode(p, req.params.id);
+  ep.review = { checked: !!req.body.checked, at: new Date().toISOString() }; logActivity(p, `${req.body.checked ? 'Story checked' : 'Story check removed'} · Ep ${ep.num} ${ep.title}`); return ep.review; })));
+app.post('/api/episodes/:id/post', h(req => update(p => { withDefaults(p); const ep = findEpisode(p, req.params.id); const pl = req.body.platform;
+  if (!ep.review?.checked && req.body.posted) throw bad('Tick the story check first');
+  ep.posts = ep.posts || {};
+  if (req.body.posted) { ep.posts[pl] = { state: 'posted', url: req.body.url || '', at: new Date().toISOString() }; logActivity(p, `Posted on ${PLATFORMS[pl]?.name || pl} · Ep ${ep.num} ${ep.title}`); }
+  else { delete ep.posts[pl]; logActivity(p, `Marked not posted on ${PLATFORMS[pl]?.name || pl} · Ep ${ep.num}`); }
+  ep.status = Object.keys(ep.posts).length ? 'published' : ep.render ? 'rendered' : ep.status; return ep.posts; })));
+app.post('/api/plan', h(req => update(p => { withDefaults(p); const num = Math.max(0, ...p.episodes.map(e => e.num), ...p.plan.items.map(i => i.num)) + 1;
+  const it = { id: newId('pl_'), num, title: req.body.title, where: req.body.where || '', beats: req.body.beats || '', status: 'idea', at: new Date().toISOString() };
+  p.plan.items.push(it); logActivity(p, `Added to the plan · ${it.title}`); return it; })));
+app.delete('/api/plan/:id', h(req => update(p => { withDefaults(p); p.plan.items = p.plan.items.filter(i => i.id !== req.params.id); return { ok: true }; })));
+
 app.get('/api/backup', (req, res) => { res.set('Content-Disposition', `attachment; filename="studio-backup-${new Date().toISOString().slice(0, 10)}.json"`); res.json(withDefaults(load())); });
 app.put('/api/series', h(req => update(p => { p.series = { ...p.series, ...req.body }; return p.series; })));
 

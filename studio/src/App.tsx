@@ -1,43 +1,51 @@
 import { useEffect, useRef, useState } from 'react';
-import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import clsx from 'clsx';
-import { AtSign, BookOpen, CalendarRange, Clapperboard, Film, LayoutDashboard, Menu, Settings as SettingsIcon, Sparkles, Users, X } from 'lucide-react';
+import { BookOpen, Clapperboard, Home, ListTodo, Menu, Moon, Settings as SettingsIcon, Sun, UserCircle2, Users, X } from 'lucide-react';
 import { STATIC, useCredits, useJobs, useProject } from './api';
 import { PinGate } from './components/PinGate';
-import { Progress } from './components/ui';
 import Dashboard from './pages/Dashboard';
 import Reels from './pages/Reels';
 import ReelDetail from './pages/ReelDetail';
 import Plan from './pages/Plan';
 import World from './pages/World';
 import Profiles from './pages/Profiles';
-import StyleDocs from './pages/StyleDocs';
+import Docs from './pages/Docs';
 import Settings from './pages/Settings';
+import { About, Privacy, Terms } from './pages/Legal';
 
 const NAV = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/reels', label: 'Reels', icon: Film },
-  { to: '/plan', label: 'Plan', icon: CalendarRange },
-  { to: '/world', label: 'Cast & World', icon: Users },
-  { to: '/profiles', label: 'Profiles', icon: AtSign },
-  { to: '/style', label: 'Style & Docs', icon: BookOpen },
+  { to: '/', label: 'Dashboard', icon: Home, end: true },
+  { to: '/reels', label: 'Reels', icon: Clapperboard },
+  { to: '/plan', label: 'Plan', icon: ListTodo },
+  { to: '/world', label: 'Cast & world', icon: Users },
+  { to: '/profiles', label: 'Profiles', icon: UserCircle2 },
+  { to: '/docs', label: 'Style & docs', icon: BookOpen },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 
-export function CreditsWidget({ compact }: { compact?: boolean }) {
-  const { data, error } = useCredits();
-  if (error) return <div className="text-xs text-rose-300">ElevenLabs not connected</div>;
-  if (!data) return <div className="text-xs text-zinc-500">Loading balance…</div>;
-  const pct = data.remaining / data.limit;
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs"><span className="text-zinc-400">ElevenLabs · {data.tier}</span><span className={clsx('font-semibold', pct < .15 ? 'text-rose-300' : 'text-zinc-100')}>{data.remaining.toLocaleString()} left</span></div>
-      <Progress value={pct} />
-      {!compact && <div className="text-[11px] text-zinc-500">{data.used.toLocaleString()} / {data.limit.toLocaleString()} credits used{data.resetsAt && ` · resets ${new Date(data.resetsAt).toLocaleDateString()}`}</div>}
+const Logo = () => (
+  <Link to="/" className="flex items-center gap-3 no-underline">
+    <img src="/favicon.svg" alt="" className="h-9 w-9" />
+    <div className="leading-tight">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold">Studio</div>
+      <div className="font-display text-lg font-extrabold tracking-wider text-parchment">Strangers to Forever</div>
     </div>
-  );
+  </Link>
+);
+
+function useTheme() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  useEffect(() => { document.documentElement.classList.toggle('dark', dark); try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch { /* ignore */ } }, [dark]);
+  return [dark, () => setDark(d => !d)] as const;
+}
+
+export function CreditsLine() {
+  const { data } = useCredits();
+  if (!data) return null;
+  return <div className="text-xs text-parchment/60">ElevenLabs: <span className="tabular font-semibold text-parchment">{data.remaining.toLocaleString()}</span> / {data.limit.toLocaleString()} credits left</div>;
 }
 
 function JobWatcher() {
@@ -47,80 +55,83 @@ function JobWatcher() {
       const prev = seen.current[j.id];
       if (prev && prev !== j.status && (j.status === 'done' || j.status === 'error')) {
         j.status === 'done' ? toast.success(`${j.label} finished`) : toast.error(`${j.label} failed: ${j.error}`);
-        ['project', 'analysis', 'credits'].forEach(k => qc.invalidateQueries({ queryKey: [k] }));
+        ['project', 'credits'].forEach(k => qc.invalidateQueries({ queryKey: [k] }));
       }
       seen.current[j.id] = j.status;
     }
   }, [jobs, qc]);
   const running = (jobs || []).filter(j => j.status === 'running' || j.status === 'queued');
-  if (!running.length) return null;
+  return running.length ? <div className="grid gap-1 text-xs text-parchment/70">{running.map(j => <div key={j.id}>⏳ {j.label} · {Math.round(j.progress * 100)}%</div>)}</div> : null;
+}
+
+function Footer({ dark, toggle }: { dark: boolean; toggle: () => void }) {
   return (
-    <div className="rounded-xl bg-white/[.04] ring-1 ring-white/10 p-3 space-y-2">
-      {running.map(j => <div key={j.id} className="space-y-1"><div className="flex justify-between text-[11px]"><span className="text-zinc-300 truncate">{j.label}</span><span className="text-zinc-500">{j.status === 'queued' ? 'queued' : Math.round(j.progress * 100) + '%'}</span></div><Progress value={j.status === 'queued' ? 0 : j.progress} /></div>)}
+    <div className="grid gap-3 border-t border-night-800 pt-4">
+      <JobWatcher />
+      <CreditsLine />
+      <button onClick={toggle} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-parchment/80 hover:bg-night-800 hover:text-parchment">{dark ? <Sun size={16} /> : <Moon size={16} />}{dark ? 'Light mode' : 'Dark mode'}</button>
+      <div className="flex gap-3 text-[11px] text-parchment/50"><Link to="/about" className="hover:text-gold">About</Link><Link to="/privacy" className="hover:text-gold">Privacy</Link><Link to="/terms" className="hover:text-gold">Terms</Link></div>
+    </div>
+  );
+}
+
+function Shell() {
+  const { data: project, error } = useProject(); const [open, setOpen] = useState(false); const loc = useLocation(); const [dark, toggle] = useTheme();
+  useEffect(() => setOpen(false), [loc.pathname]);
+  const nav = (
+    <nav className="grid gap-1">
+      {NAV.map(({ to, label, icon: Icon, end }) => (
+        <NavLink key={to} to={to} end={end} className={({ isActive }) => clsx('flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition', isActive ? 'bg-gold text-night-950' : 'text-parchment/80 hover:bg-night-800 hover:text-parchment')}>
+          <Icon size={18} /> {label}
+        </NavLink>
+      ))}
+    </nav>
+  );
+  return (
+    <div className="flex min-h-full">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between bg-night-950 p-5 text-parchment lg:flex">
+        <div className="grid gap-8"><Logo />{nav}</div>
+        <Footer dark={dark} toggle={toggle} />
+      </aside>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex items-center justify-between bg-night-950 px-4 py-3 text-parchment lg:hidden" style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}>
+          <Logo /><button aria-label="Open menu" onClick={() => setOpen(true)} className="rounded-lg p-2 hover:bg-night-800"><Menu /></button>
+        </header>
+        {open && (
+          <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setOpen(false)}>
+            <div className="flex h-full w-72 flex-col justify-between bg-night-950 p-5 text-parchment" onClick={e => e.stopPropagation()}>
+              <div><div className="mb-6 flex items-center justify-between"><Logo /><button aria-label="Close menu" onClick={() => setOpen(false)} className="rounded-lg p-2 hover:bg-night-800"><X /></button></div>{nav}</div>
+              <Footer dark={dark} toggle={toggle} />
+            </div>
+          </div>
+        )}
+        {STATIC && <div className="border-b border-gold/30 bg-gold-soft/60 px-4 py-2 text-center text-xs text-gold-deep dark:bg-gold/10 dark:text-gold">Online copy · story, voices and rendering happen with Claude</div>}
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}>
+          {error ? <div className="rounded-xl border border-vermilion/40 bg-vermilion/5 p-4 text-sm text-vermilion">Can't reach the studio: {(error as Error).message}</div>
+            : !project ? <div className="py-8 text-sm text-ink-soft dark:text-parchment/60">Loading the studio…</div> : (
+              <Routes>
+                <Route path="/" element={<Dashboard p={project} />} />
+                <Route path="/reels" element={<Reels p={project} />} />
+                <Route path="/reels/:id" element={<ReelDetail p={project} />} />
+                <Route path="/plan" element={<Plan p={project} />} />
+                <Route path="/world" element={<World p={project} />} />
+                <Route path="/profiles" element={<Profiles p={project} />} />
+                <Route path="/docs" element={<Docs p={project} />} />
+                <Route path="/docs/:slug" element={<Docs p={project} />} />
+                <Route path="/settings" element={<Settings p={project} />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            )}
+        </main>
+      </div>
     </div>
   );
 }
 
 export default function App() {
-  if (STATIC) return <PinGate><Studio /></PinGate>;
-  return <Studio />;
-}
-
-function Studio() {
-  const { data: project, error } = useProject(); const [open, setOpen] = useState(false); const loc = useLocation();
-  useEffect(() => setOpen(false), [loc.pathname]);
-  const pending = project?.claudeRequests.filter(r => r.status === 'pending').length || 0;
-  return (
-    <div className="flex h-full">
-      <aside className={clsx('fixed inset-y-0 left-0 z-40 w-64 shrink-0 border-r border-white/[.06] bg-zinc-950/90 backdrop-blur-xl p-4 flex flex-col gap-4 transition-transform lg:static lg:translate-x-0', open ? 'translate-x-0' : '-translate-x-full')}>
-        <div className="flex items-center gap-3 px-2 pt-1">
-          <div className="size-10 rounded-xl bg-gradient-to-br from-pink-500 to-violet-600 grid place-items-center shadow-lg shadow-pink-500/30"><Clapperboard className="size-5 text-white" /></div>
-          <div className="min-w-0"><div className="font-bold text-white leading-tight">Reel Studio</div><div className="text-[11px] text-zinc-400 truncate">{project?.series.title || '…'}</div></div>
-          <button className="ml-auto lg:hidden text-zinc-400" onClick={() => setOpen(false)}><X className="size-5" /></button>
-        </div>
-        <nav className="flex flex-col gap-0.5">
-          {NAV.map(n => (
-            <NavLink key={n.to} to={n.to} end={n.to === '/'} className={({ isActive }) => clsx('flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition', isActive ? 'bg-gradient-to-r from-pink-500/20 to-violet-500/10 text-white ring-1 ring-pink-500/20' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[.04]')}>
-              <n.icon className="size-4" />{n.label}
-              {n.to === '/plan' && pending > 0 && <span className="ml-auto rounded-full bg-amber-500/20 text-amber-300 text-[10px] px-1.5">{pending}</span>}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="mt-auto space-y-3">
-          <JobWatcher />
-          <div className="rounded-xl bg-white/[.04] ring-1 ring-white/10 p-3"><CreditsWidget compact /></div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-500 px-1"><Sparkles className="size-3.5 text-pink-400" />Writer: Claude (via Claude Code)</div>
-        </div>
-      </aside>
-      {open && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setOpen(false)} />}
-      <main className="flex-1 min-w-0 overflow-y-auto">
-        <div className="lg:hidden sticky top-0 z-20 flex items-center gap-3 border-b border-white/[.06] bg-zinc-950/80 backdrop-blur px-4 py-3">
-          <button onClick={() => setOpen(true)}><Menu className="size-5" /></button><span className="font-semibold">Reel Studio</span>
-        </div>
-        {STATIC && <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-200">View-only copy of the studio · editing, voices and rendering happen in Claude Code</div>}
-        <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-          {error ? <div className="text-rose-300">Can't reach the studio server: {(error as Error).message}</div> : !project ? <div className="text-zinc-400">Loading studio…</div> : (
-            <Routes>
-              <Route path="/" element={<Dashboard p={project} />} />
-              <Route path="/reels" element={<Reels p={project} />} />
-              <Route path="/reels/:id" element={<ReelDetail p={project} />} />
-              <Route path="/plan" element={<Plan p={project} />} />
-              <Route path="/world" element={<World p={project} />} />
-              <Route path="/profiles" element={<Profiles p={project} />} />
-              <Route path="/style" element={<StyleDocs p={project} />} />
-              <Route path="/settings" element={<Settings p={project} />} />
-              {/* old links */}
-              <Route path="/episodes/:id" element={<ReelDetail p={project} />} />
-              <Route path="/episodes" element={<Navigate to="/reels" replace />} />
-              <Route path="/inbox" element={<Navigate to="/plan?tab=inbox" replace />} />
-              <Route path="/cast" element={<Navigate to="/world" replace />} />
-              <Route path="/voices" element={<Navigate to="/world?tab=voices" replace />} />
-              <Route path="/knowledge" element={<Navigate to="/style" replace />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          )}
-        </div>
-      </main>
-    </div>
-  );
+  if (STATIC) return <PinGate><Shell /></PinGate>;
+  return <Shell />;
 }

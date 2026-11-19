@@ -1496,5 +1496,204 @@
         "variant": "instagram"
       }
     }
-  ]
+  ],
+  "notes": "",
+  "activity": [
+    {
+      "at": "2026-11-19T19:33:07.099Z",
+      "text": "Added to the plan · The Friend Request"
+    },
+    {
+      "at": "2026-11-19T19:33:07.097Z",
+      "text": "Added to the plan · Same Platform, Different Trains"
+    },
+    {
+      "at": "2026-11-19T19:33:07.093Z",
+      "text": "Added to the plan · The Hotspot"
+    },
+    {
+      "at": "2026-11-19T19:33:07.091Z",
+      "text": "Added to the plan · The Smartphone"
+    }
+  ],
+  "brand": {
+    "channel": "Strangers to Forever",
+    "series": "Strangers to Forever",
+    "edition": "Season 1 · College days",
+    "tagline": "From strangers to lifetime partners",
+    "cta": "Follow for the next part 💕",
+    "palette": [
+      "#ff8fab",
+      "#6ea8fe",
+      "#b69cff",
+      "#0b1a7a",
+      "#ffc93c"
+    ],
+    "loudness": "-14 LUFS (Instagram / YouTube)",
+    "category": "Digital creator",
+    "keywords": [
+      "love story",
+      "animated story",
+      "college love",
+      "hinglish story",
+      "engineering love",
+      "bangalore"
+    ],
+    "playlist": "Strangers to Forever (in order)"
+  },
+  "plan": {
+    "items": [
+      {
+        "id": "pl_nnalnwa",
+        "num": 2,
+        "title": "The Smartphone",
+        "where": "Sem 1 · her birthday",
+        "beats": "Her parents gift Ishita her first smartphone. She has no idea how to use it, until Zoya shows her the hotspot button.",
+        "status": "idea",
+        "at": "2026-11-19T19:33:07.091Z"
+      },
+      {
+        "id": "pl_70hbq2z",
+        "num": 3,
+        "title": "The Hotspot",
+        "where": "Sem 1 · science lab day",
+        "beats": "Tanvi asks to borrow Ishita's hotspot (no password). Downstairs in the science lab, Vihaan connects to it.",
+        "status": "idea",
+        "at": "2026-11-19T19:33:07.093Z"
+      },
+      {
+        "id": "pl_cccr33t",
+        "num": 4,
+        "title": "Same Platform, Different Trains",
+        "where": "After the summer holidays",
+        "beats": "Coming back for Sem 2, both stand on the same platform, board different trains, and still don't know each other.",
+        "status": "idea",
+        "at": "2026-11-19T19:33:07.097Z"
+      },
+      {
+        "id": "pl_vdysncx",
+        "num": 5,
+        "title": "The Friend Request",
+        "where": "Sem 2 · the first message",
+        "beats": "A friend request from Vihaan. Mutual friends from 12th, so she accepts. Numbers are exchanged and the texting begins.",
+        "status": "idea",
+        "at": "2026-11-19T19:33:07.099Z"
+      }
+    ]
+  },
+  "calendar": [],
+  "world": {
+    "relations": [
+      {
+        "a": "ishita",
+        "b": "vihaan",
+        "label": "strangers → lifetime partners"
+      },
+      {
+        "a": "ishita",
+        "b": "zoya",
+        "label": "roommate & best friend"
+      },
+      {
+        "a": "ishita",
+        "b": "tanvi",
+        "label": "classmate (borrowed the hotspot)"
+      },
+      {
+        "a": "ishita",
+        "b": "appa",
+        "label": "father"
+      },
+      {
+        "a": "ishita",
+        "b": "amma",
+        "label": "mother"
+      }
+    ]
+  },
+  "profiles": {
+    "instagram": {
+      "handle": "",
+      "displayName": "Strangers to Forever",
+      "bio": "Our love story, one reel at a time 💕\nFrom strangers in engineering college to forever\n👇 Start from Part 1",
+      "link": "",
+      "checklist": {}
+    },
+    "youtube": {
+      "handle": "",
+      "displayName": "Strangers to Forever",
+      "bio": "An animated Hinglish love story told in Shorts. From strangers to lifetime partners. New part every few days. Subscribe 🔔",
+      "link": "",
+      "checklist": {}
+    },
+    "facebook": {
+      "handle": "",
+      "displayName": "",
+      "bio": "",
+      "link": "",
+      "checklist": {}
+    },
+    "moj": {
+      "handle": "",
+      "displayName": "",
+      "bio": "",
+      "link": "",
+      "checklist": {}
+    }
+  },
+  "stats": [],
+  "style": {
+    "captionTemplates": [
+      {
+        "id": "t1",
+        "name": "Hook + question",
+        "text": "{hook} 💕 Part {num} of our story. {question} 👇"
+      },
+      {
+        "id": "t2",
+        "name": "POV",
+        "text": "POV: {hook} 😭 Part {num}. Would you have done the same? 👇"
+      },
+      {
+        "id": "t3",
+        "name": "Callback",
+        "text": "Last part: {previous}… aaj kuch aur hua 👀 Part {num}"
+      }
+    ],
+    "hashtagSets": [
+      {
+        "id": "h1",
+        "name": "Core series",
+        "tags": [
+          "StrangersToForever",
+          "lovestory",
+          "animatedstory",
+          "hinglishstory",
+          "reels"
+        ]
+      },
+      {
+        "id": "h2",
+        "name": "College love",
+        "tags": [
+          "collegelove",
+          "engineeringlove",
+          "collegelovestory",
+          "hostellife",
+          "bangalorelove"
+        ]
+      },
+      {
+        "id": "h3",
+        "name": "Romance reach",
+        "tags": [
+          "couplegoals",
+          "strangerstolovers",
+          "lovestorytime",
+          "cutecouple",
+          "trendingreels"
+        ]
+      }
+    ]
+  }
 }

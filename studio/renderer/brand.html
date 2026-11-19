@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0}canvas{display:block}</style></head><body><canvas id="c"></canvas>
+<script src="../../engine/engine.js"></script><script src="../../engine/engine2.js"></script>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+async function fonts() { for (const [f, u, w] of [['Fredoka', '../../fonts/Fredoka-700.woff2', 700], ['Cinzel', '../node_modules/@fontsource/cinzel/files/cinzel-latin-800-normal.woff2', 800]]) { try { document.fonts.add(await new FontFace(f, `url(${u})`, { weight: String(w) }).load()); } catch (e) {} } }
+function bgGrad(w, h) { const g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#2a1f5c'); g.addColorStop(.6, '#6b3fa0'); g.addColorStop(1, '#ff7aa8'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < 40; i++) { ctx.fillStyle = `rgba(255,255,255,${.2 + .5 * rand(i)})`; ctx.beginPath(); ctx.arc(rand(i + 3) * w, rand(i + 9) * h * .6, 1.5 + rand(i) * 3, 0, 7); ctx.fill(); } }
+function couple(cx, base, s) { hero(ctx, cx - 120 * s, base, s, CAST2.ishita, { t: 1.2, emo: 'happy', look: .8, tilt: .08 }); hero(ctx, cx + 120 * s, base, s, CAST2.vihaan, { t: 1.7, emo: 'happy', look: -.8, tilt: -.08 }); heart(ctx, cx, base - 640 * s, 1.6 * s, '#ff5d8f'); }
+function title(text, x, y, size, color = '#fff', stroke = '#ff5d8f') { ctx.font = `700 ${size}px Fredoka`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = size * .14; ctx.strokeStyle = stroke; ctx.strokeText(text, x, y); ctx.fillStyle = color; ctx.fillText(text, x, y); }
+window.draw = async (kind) => {
+  await fonts();
+  if (kind === 'avatar') { cv.width = cv.height = 1080; bgGrad(1080, 1080); ctx.save(); ctx.beginPath(); ctx.arc(540, 540, 540, 0, 7); ctx.clip(); couple(540, 1430, 1.45); ctx.restore(); }
+  if (kind === 'banner') { cv.width = 2560; cv.height = 1440; bgGrad(2560, 1440); couple(700, 1340, 1.25); title('Strangers to', 1700, 600, 150); title('Forever', 1700, 790, 190, '#ffc93c', '#0b1a7a'); title('An animated love story', 1700, 930, 60, '#fff', '#45337a'); title('new part every few days', 1700, 1010, 52, '#fff', '#45337a'); }
+  if (kind === 'watermark') { cv.width = cv.height = 150; ctx.clearRect(0, 0, 150, 150); ctx.fillStyle = '#ff5d8f'; ctx.beginPath(); ctx.arc(75, 75, 72, 0, 7); ctx.fill(); heart(ctx, 75, 82, 1.25, '#fff'); }
+  if (kind === 'highlight') { cv.width = 1080; cv.height = 1920; bgGrad(1080, 1920); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(540, 960, 380, 0, 7); ctx.fill(); heart(ctx, 540, 990, 6, '#fff'); title('Part 1 →', 540, 1500, 110); }
+  return cv.toDataURL('image/png');
+};
+</script></body></html>

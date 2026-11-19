@@ -21,6 +21,13 @@ Claude is the writer, voice director, animator and editor; the user publishes fr
 - Real ↔ series names live only in `PRIVATE-name-map.md` and `studio/data/private/` (both git-ignored).
 - Series names: Ishita (lead), Vihaan (lead), Zoya (roommate), Tanvi (classmate), Appa, Amma. Hometown: Dharwad. City: Bangalore. College: Silicon Valley Institute of Technology.
 
+## Studio model (matches Untold Granth Studio)
+- The studio app is a lean review-and-publish tool: Dashboard ("Today in the studio"), Reels (table + per-reel Publish / Story check),
+  Plan, Cast & world, Profiles (brand kit + profile copy), Style & docs (+ Your notes), Settings (brand, access, connections).
+- Claude does all writing/voicing/animation/rendering here; the user reviews (story-check tick unlocks posting), posts, and marks posted.
+- Theme: parchment/ink/gold/vermilion + night sidebar, Cinzel / Mukta / JetBrains Mono, light + dark mode.
+- Brand kit: `cd studio && node server/brand.js` (avatar, banner, watermark, highlight cover → data/media/brand).
+
 ## Workflow
 - Studio: `cd studio && node --no-warnings server/index.js` (API :5174) and `npx vite` (UI :5173).
 - Voices: ElevenLabs, model eleven_v3, Hinglish voice script in Devanagari + English-letter on-screen text (`subtitle`).

@@ -1,56 +1,90 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Database, Download, Eye, EyeOff, Plus, Save, ShieldCheck, Trash2 } from 'lucide-react';
-import { api, Project, useAct } from '../api';
-import { Button, Card, Field, Input, PageHeader, Select } from '../components/ui';
-import { CreditsWidget } from '../App';
+import clsx from 'clsx';
+import { api, Project, saveDoc, useAct } from '../api';
+import { Badge, Button, card, Field, Input, muted, PageHeader } from '../components/ui';
 
 export default function Settings({ p }: { p: Project }) {
   const qc = useQueryClient();
-  const [series, setSeries] = useState(p.series); useEffect(() => setSeries(p.series), [p.series]);
-  const saveSeries = useAct(() => api('/series', { method: 'PUT', body: series }), { success: 'Series saved' });
-  const { data: map } = useQuery({ queryKey: ['name-map'], queryFn: () => api<{ real: string; series: string; kind: string }[]>('/privacy/name-map') });
-  const [rows, setRows] = useState<{ real: string; series: string; kind: string }[]>([]); const [show, setShow] = useState(false);
-  useEffect(() => { if (map) setRows(map); }, [map]);
-  const saveMap = useAct(() => api('/privacy/name-map', { method: 'PUT', body: rows }).then(() => qc.invalidateQueries({ queryKey: ['name-map'] })), { success: 'Private name map saved', invalidate: ['analysis'] });
-  const counts = { reels: p.episodes.length, stories: p.stories.length, characters: p.characters.length, places: p.places.length, notes: p.knowledge.length, planned: p.plan.items.length };
-
+  const [b, setB] = useState(p.brand); useEffect(() => setB(p.brand), [p.brand]);
+  const saveBrand = useAct(() => saveDoc('brand', b), { success: 'Brand saved' });
+  const { data: integ } = useQuery({ queryKey: ['integrations'], queryFn: () => api<any>('/integrations') });
+  const { data: hub } = useQuery({ queryKey: ['hub'], queryFn: () => api<{ url: string | null; pin: boolean }>('/hub') });
+  const [yt, setYt] = useState({ clientId: '', clientSecret: '' }); const [ig, setIg] = useState({ igUserId: '', accessToken: '', publicBaseUrl: '' });
+  useEffect(() => { if (integ) { setYt({ clientId: '', clientSecret: '', ...integ.settings.youtube }); setIg({ igUserId: '', accessToken: '', publicBaseUrl: '', ...integ.settings.instagram }); } }, [integ]);
+  const saveConn = useAct(() => api('/integrations', { method: 'PUT', body: { youtube: yt, instagram: ig } }).then(() => qc.invalidateQueries({ queryKey: ['integrations'] })), { success: 'Saved', invalidate: [] });
+  const st = integ?.status || {};
+  const handles = Object.entries(p.profiles || {}).filter(([, v]) => v.handle);
+  const redirect = `${location.origin.replace(':5173', ':5174')}/api/auth/youtube/callback`;
   return (
-    <>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <PageHeader title="Settings" />
-      <div className="grid lg:grid-cols-2 gap-4">
-        <Card title="Series" actions={<Button size="sm" variant="primary" onClick={() => saveSeries.mutate()} loading={saveSeries.isPending} icon={<Save className="size-3.5" />}>Save</Button>}>
-          <div className="space-y-3">
-            <Field label="Title"><Input value={series.title} onChange={e => setSeries({ ...series, title: e.target.value })} /></Field>
-            <Field label="Tagline"><Input value={series.tagline} onChange={e => setSeries({ ...series, tagline: e.target.value })} /></Field>
-            <Field label="Language"><Select value={series.language} onChange={e => setSeries({ ...series, language: e.target.value })} options={['Hinglish', 'Hindi', 'English', 'Kannada'].map(v => ({ value: v, label: v }))} /></Field>
-            <Field label="Default hashtags"><Input value={series.hashtags.map(h => '#' + h).join(' ')} onChange={e => setSeries({ ...series, hashtags: e.target.value.split(/[\s,#]+/).filter(Boolean) })} /></Field>
-            <Field label="Background score style" hint="Global music style; each shot's mood adds its own flavour"><Input value={series.musicStyle.join(', ')} onChange={e => setSeries({ ...series, musicStyle: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} /></Field>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className={card}>
+          <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-lg font-semibold tracking-wide">Brand</h2><Button size="sm" variant="primary" disabled={JSON.stringify(b) === JSON.stringify(p.brand)} loading={saveBrand.isPending} onClick={() => saveBrand.mutate()}>Save</Button></div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Channel"><Input value={b.channel} onChange={e => setB({ ...b, channel: e.target.value })} /></Field>
+            <Field label="Series"><Input value={b.series} onChange={e => setB({ ...b, series: e.target.value })} /></Field>
+            <Field label="Edition"><Input value={b.edition} onChange={e => setB({ ...b, edition: e.target.value })} /></Field>
+            <Field label="Tagline"><Input value={b.tagline} onChange={e => setB({ ...b, tagline: e.target.value })} /></Field>
+            <Field label="CTA" className="sm:col-span-2"><Input value={b.cta} onChange={e => setB({ ...b, cta: e.target.value })} /></Field>
+            <Field label="Palette" className="sm:col-span-2"><div className="flex flex-wrap items-center gap-2">{b.palette.map((c, i) => <input key={i} type="color" value={c} onChange={e => setB({ ...b, palette: b.palette.map((x, j) => j === i ? e.target.value : x) })} className="h-9 w-12 cursor-pointer rounded-lg border border-parchment-deep bg-transparent dark:border-night-700" />)}</div></Field>
+            <Field label="Loudness"><Input value={b.loudness} onChange={e => setB({ ...b, loudness: e.target.value })} /></Field>
+            <Field label="Channels"><div className={clsx('flex min-h-10 flex-wrap items-center gap-2 font-mono text-xs', muted)}>{handles.length ? handles.map(([k, v]) => <span key={k}>{k} @{v.handle}</span>) : 'Set handles on the Profiles page'}</div></Field>
           </div>
-        </Card>
-        <div className="space-y-4">
-          <Card title="ElevenLabs" subtitle="Voices + background score"><CreditsWidget /><p className="text-xs text-zinc-500 mt-3">The key comes from the environment (ELEVENLABS_API_KEY, or the secure network secret in Claude Code). It is never stored in this app.</p></Card>
-          <Card title={<span className="flex items-center gap-2"><Database className="size-4" />Data & backup</span>} subtitle="Everything public is committed to GitHub after every change">
-            <div className="grid grid-cols-3 gap-2 mb-3">{Object.entries(counts).map(([k, v]) => <div key={k} className="rounded-xl bg-white/[.03] ring-1 ring-white/[.06] p-2 text-center"><div className="text-lg font-bold">{v}</div><div className="text-[11px] text-zinc-500">{k}</div></div>)}</div>
-            <a href="/api/backup"><Button icon={<Download className="size-4" />}>Download full backup (JSON)</Button></a>
-          </Card>
+        </section>
+        <div className="grid content-start gap-6">
+          <section className={card}>
+            <h2 className="font-display text-lg font-semibold tracking-wide">Access</h2>
+            <p className={clsx('mt-1 text-sm', muted)}>The online studio and the Publish Hub are locked with a PIN{hub?.pin ? ' (set)' : ''}. Only people you give the PIN to can see anything.</p>
+            {hub?.url && <p className="mt-2 text-sm">Publish Hub: <a href={hub.url} target="_blank" className="font-semibold text-gold-deep underline dark:text-gold">{hub.url.replace('https://', '')}</a></p>}
+            <p className={clsx('mt-2 text-xs', muted)}>To change the PIN, ask Claude.</p>
+          </section>
+          <section className={card}>
+            <h2 className="font-display text-lg font-semibold tracking-wide">How data gets here</h2>
+            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
+              <li>You send Claude the story. Claude writes the script, casts the voices, animates and renders each reel in the studio engine (in the GitHub repo), then syncs it here: script, captions, cover and both cuts.</li>
+              <li>Real names never leave Claude's machine. Everything here uses the series names.</li>
+              <li>You check the story, post on each platform (or from the Publish Hub), and mark it posted. Everything is logged in Recent activity.</li>
+            </ol>
+          </section>
         </div>
-        <Card className="lg:col-span-2" title={<span className="flex items-center gap-2"><ShieldCheck className="size-4 text-emerald-400" />Privacy: real ↔ series names</span>}
-          subtitle="Stored only on this machine (data/private), never committed or published. Used to auto-anonymize story dumps and block leaks."
-          actions={<><Button size="sm" variant="ghost" onClick={() => setShow(!show)} icon={show ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}>{show ? 'Hide' : 'Show'}</Button><Button size="sm" variant="primary" onClick={() => saveMap.mutate()} loading={saveMap.isPending} icon={<Save className="size-3.5" />}>Save</Button></>}>
-          <div className="space-y-2">
-            {rows.map((r, i) => (
-              <div key={i} className="grid grid-cols-[1fr_1fr_140px_auto] gap-2">
-                <Input type={show ? 'text' : 'password'} value={r.real} placeholder="Real name / place" onChange={e => setRows(rows.map((x, j) => j === i ? { ...x, real: e.target.value } : x))} />
-                <Input value={r.series} placeholder="Series name" onChange={e => setRows(rows.map((x, j) => j === i ? { ...x, series: e.target.value } : x))} />
-                <Select value={r.kind} onChange={e => setRows(rows.map((x, j) => j === i ? { ...x, kind: e.target.value } : x))} options={['person', 'place', 'college', 'other'].map(v => ({ value: v, label: v }))} />
-                <Button size="sm" variant="danger" onClick={() => setRows(rows.filter((_, j) => j !== i))} icon={<Trash2 className="size-3.5" />} />
-              </div>
-            ))}
-            <Button size="sm" variant="ghost" onClick={() => setRows([...rows, { real: '', series: '', kind: 'person' }])} icon={<Plus className="size-3.5" />}>Add mapping</Button>
-          </div>
-        </Card>
       </div>
-    </>
+
+      <section className={card}>
+        <h2 className="font-display text-lg font-semibold tracking-wide">Posting connections</h2>
+        <p className={clsx('mt-1 text-sm', muted)}>Optional. Without these you post manually from the Publish Hub and tap “Mark posted”.</p>
+        <div className="mt-4 grid gap-8 lg:grid-cols-2">
+          <div className="grid content-start gap-3">
+            <div className="flex items-center gap-2"><h3 className="font-display font-semibold tracking-wider">YouTube</h3>{st.youtube?.connected ? <Badge tone="approved">connected</Badge> : <Badge>not connected</Badge>}</div>
+            <p className="text-sm">One-time Google setup (about 10 minutes):</p>
+            <ol className="list-decimal space-y-1 pl-5 text-sm">
+              <li>Google Cloud → new project <span className="font-mono">strangers-to-forever</span></li>
+              <li>Enable <b>YouTube Data API v3</b></li>
+              <li>Google Auth Platform → app name “Strangers to Forever Studio”, <b>External</b> → Audience → Publish app</li>
+              <li>Clients → Create client → <b>Web application</b>, redirect URI <span className="break-all font-mono text-xs">{redirect}</span></li>
+              <li>Paste the Client ID and Client secret below, then press <b>Connect YouTube</b>.</li>
+            </ol>
+            <Field label="Client ID"><Input value={yt.clientId} onChange={e => setYt({ ...yt, clientId: e.target.value })} /></Field>
+            <Field label="Client secret"><Input type="password" value={yt.clientSecret} onChange={e => setYt({ ...yt, clientSecret: e.target.value })} /></Field>
+            <div className="flex gap-2"><Button onClick={() => saveConn.mutate()}>Save</Button><Button variant="primary" disabled={!st.youtube?.configured} onClick={() => window.open('/api/auth/youtube/start', '_blank')}>Connect YouTube</Button></div>
+            <p className={clsx('text-xs', muted)}>Until Google audits the app, YouTube keeps API uploads <b>private</b>.</p>
+          </div>
+          <div className="grid content-start gap-3">
+            <div className="flex items-center gap-2"><h3 className="font-display font-semibold tracking-wider">Instagram</h3>{st.instagram?.configured ? <Badge tone="approved">configured</Badge> : <Badge>not set up</Badge>}</div>
+            <p className="text-sm">One-time Meta setup (Instagram must be a professional/Creator account):</p>
+            <ol className="list-decimal space-y-1 pl-5 text-sm">
+              <li>Meta for Developers → My Apps → create an app with <b>Instagram API</b></li>
+              <li>Add your Instagram account and generate a long-lived token with <span className="font-mono text-xs">instagram_business_content_publish</span></li>
+              <li>Instagram fetches the video from a public link, so the studio's public address is needed too.</li>
+            </ol>
+            <Field label="Instagram user ID"><Input value={ig.igUserId} onChange={e => setIg({ ...ig, igUserId: e.target.value })} /></Field>
+            <Field label="Access token"><Input type="password" value={ig.accessToken} onChange={e => setIg({ ...ig, accessToken: e.target.value })} /></Field>
+            <Field label="Public base URL"><Input value={ig.publicBaseUrl} onChange={e => setIg({ ...ig, publicBaseUrl: e.target.value })} /></Field>
+            <div><Button onClick={() => saveConn.mutate()}>Save</Button></div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

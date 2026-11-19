@@ -12,13 +12,14 @@ export function PinGate({ children }: { children: ReactNode }) {
   if (hash === undefined) return null;
   if (!hash || ok) return <>{children}</>;
   return (
-    <div className="min-h-screen grid place-items-center p-6">
-      <form className="w-full max-w-xs space-y-4 text-center" onSubmit={async e => { e.preventDefault(); if (await sha256(v) === hash) { try { sessionStorage.setItem('studio-ok', '1'); } catch { /* ignore */ } setOk(true); } else setBad(true); }}>
-        <div className="mx-auto size-14 rounded-2xl bg-gradient-to-br from-pink-500 to-violet-600 grid place-items-center"><Lock className="size-6 text-white" /></div>
-        <h1 className="text-xl font-bold text-white">Reel Studio</h1>
-        <input autoFocus type="password" inputMode="numeric" value={v} onChange={e => { setV(e.target.value); setBad(false); }} placeholder="PIN" className="w-full rounded-xl bg-white/10 px-4 py-3 text-center text-lg tracking-widest text-white outline-none focus:ring-2 focus:ring-pink-500" />
-        {bad && <p className="text-sm text-rose-300">Wrong PIN</p>}
-        <button className="w-full rounded-xl bg-gradient-to-r from-pink-500 to-violet-500 py-3 font-semibold text-white">Unlock</button>
+    <div className="grid min-h-screen place-items-center bg-night-950 px-4 py-10 text-parchment">
+      <form className="w-full max-w-md rounded-3xl border border-night-700 bg-night-900 p-8 shadow-2xl" onSubmit={async e => { e.preventDefault(); if (await sha256(v) === hash) { try { sessionStorage.setItem('studio-ok', '1'); } catch { /* ignore */ } setOk(true); } else setBad(true); }}>
+        <div className="mb-6 flex items-center gap-3"><img src="/favicon.svg" alt="" className="h-10 w-10" /><div><div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">Studio</div><div className="font-display text-xl font-extrabold tracking-wider">Strangers to Forever</div></div></div>
+        <h1 className="font-display text-2xl font-extrabold">Enter PIN</h1>
+        <p className="mt-1 text-sm text-parchment/70">Same PIN as the Publish Hub.</p>
+        <input autoFocus type="password" inputMode="numeric" value={v} onChange={e => { setV(e.target.value); setBad(false); }} placeholder="PIN" className="mt-4 w-full rounded-xl border border-night-700 bg-night-950 px-4 py-3 text-base text-parchment outline-none focus:border-gold" />
+        {bad && <p className="mt-3 rounded-xl bg-vermilion/15 p-3 text-sm text-red-300">Wrong PIN</p>}
+        <button className="mt-4 w-full rounded-lg bg-gold py-3 font-semibold text-night-950 hover:bg-gold-soft"><Lock className="mr-1 inline" size={16} />Unlock</button>
       </form>
     </div>
   );

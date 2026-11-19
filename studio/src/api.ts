@@ -12,13 +12,14 @@ export type Episode = {
   render?: Render; renders?: Record<string, Render>;
   publish: { caption: string; hashtags: string[]; youtubeTitle: string; youtubePrivacy: string; cta?: Record<string, string>; history: PublishEntry[]; scheduled: { id: string; platform: string; at: string }[] };
   createdAt: string; updatedAt?: string;
+  code: string; stage: string; where?: string; type?: string; review?: { checked: boolean; at: string }; posts?: Record<string, { state: string; url: string; at: string }>;
 };
 export type Character = { id: string; name: string; role: string; description: string; color: string; look: string | null; voice: { id: string; name: string; model?: string } | null };
 export type Place = { id: string; name: string; scene: string; description: string };
 export type Story = { id: string; createdAt: string; text: string; tags: string[]; replaced: string[]; status: string };
 export type ClaudeRequest = { id: string; createdAt: string; kind: string; storyIds: string[]; episodeId: string | null; note: string; status: string; result?: string };
 export type KB = { id: string; title: string; tags: string[]; body: string };
-export type PlanItem = { id: string; num: number; title: string; beats: string; status: 'idea' | 'planned' | 'production' | 'done'; episodeId?: string; hook?: string };
+export type PlanItem = { id: string; num: number; title: string; beats: string; where?: string; status: string; episodeId?: string; hook?: string; at?: string };
 export type CalSlot = { id: string; date: string; platform: string; episodeNum?: number; note?: string };
 export type Profile = { handle: string; displayName: string; bio: string; link: string; checklist: Record<string, boolean> };
 export type Stat = { id: string; date: string; platform: string; followers: number; views: number };
@@ -30,6 +31,8 @@ export type Project = {
   variants: Record<string, { label: string; cta: string; color: string }>;
   plan: { items: PlanItem[] }; calendar: CalSlot[]; world: { relations: { a: string; b: string; label: string }[] };
   profiles: Record<string, Profile>; stats: Stat[];
+  notes: string; activity: { at: string; text: string }[];
+  brand: { channel: string; series: string; edition: string; tagline: string; cta: string; palette: string[]; loudness: string; category: string; keywords: string[]; playlist: string };
   style: { captionTemplates: { id: string; name: string; text: string }[]; hashtagSets: { id: string; name: string; tags: string[] }[] };
 };
 export const saveDoc = (key: string, value: unknown) => api(`/doc/${key}`, { method: 'PUT', body: value });
