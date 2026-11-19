@@ -9,6 +9,19 @@ const BEST_TIMES = ['Today 7:30 PM', 'Today 1:00 PM', 'Tomorrow 7:30 PM'];
 function suggestTime(i: number) { const d = new Date(); if (i === 1) d.setHours(13, 0, 0, 0); else { d.setHours(19, 30, 0, 0); if (i === 2) d.setDate(d.getDate() + 1); } if (d < new Date()) d.setDate(d.getDate() + 1); return d; }
 const toLocalInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 
+function HubCard() {
+  const { data: hub } = useQuery({ queryKey: ['hub'], queryFn: () => api<{ url: string | null; lastDeploy: string | null; pin: boolean }>('/hub') });
+  const [pin, setPin] = useState('');
+  const deploy = useAct(() => api('/hub/deploy', { body: { pin: pin || undefined } }), { success: 'Updating Publish Hub…', invalidate: ['jobs', 'hub'] });
+  return (
+    <Card title="Publish Hub" subtitle="Your phone-ready site on Netlify: every episode with Share-to-Instagram / YouTube buttons">
+      {hub?.url ? <a href={hub.url} target="_blank" className="text-sm text-pink-300 break-all inline-flex items-center gap-1">{hub.url}<ExternalLink className="size-3" /></a> : <p className="text-xs text-zinc-500">Not deployed yet.</p>}
+      {hub?.lastDeploy && <p className="text-[11px] text-zinc-500 mt-1">Updated {new Date(hub.lastDeploy).toLocaleString()}{hub.pin ? ' · PIN protected' : ''}</p>}
+      <div className="flex gap-2 mt-3"><Input value={pin} onChange={e => setPin(e.target.value)} placeholder={hub?.pin ? 'Change PIN (optional)' : 'Set a PIN (recommended)'} /><Button variant="primary" loading={deploy.isPending} onClick={() => deploy.mutate()}>Update</Button></div>
+    </Card>
+  );
+}
+
 export default function Publish({ p }: { p: Project }) {
   const { id } = useParams(); const nav = useNavigate();
   const ep = p.episodes.find(e => e.id === id) || p.episodes.find(e => e.render) || p.episodes[0];
@@ -82,6 +95,7 @@ export default function Publish({ p }: { p: Project }) {
           </Card>
         </div>
         <div className="space-y-4">
+          <HubCard />
           {Object.entries(ep.renders || (ep.render ? { instagram: ep.render } : {})).map(([v, r]) => (
             <Card key={v} title={`${p.variants[v]?.label || v} cut`} subtitle={`Ends with ${p.variants[v]?.cta || 'FOLLOW'}`}>
               <video src={r.url} poster={r.poster} controls playsInline className="w-full rounded-xl aspect-[9/16] bg-black" />

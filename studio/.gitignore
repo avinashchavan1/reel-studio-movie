@@ -5,3 +5,6 @@ data/media/renders/
 data/media/previews/
 data/media/exports/
 *.tsbuildinfo
+hub-dist/
+hub/public/media/
+hub/public/episodes.json
