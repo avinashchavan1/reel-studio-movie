@@ -1,0 +1,205 @@
+// Data-driven reel renderer. window.boot(spec) then window.renderFrame(t) → data URL.
+let SPEC = null; const CH = {}, PL = {};
+const ctx = document.getElementById('c').getContext('2d');
+const EXPR = { sad: 'sad', happy: 'joy', shocked: 'shock', firm: 'smirk', blush: 'blush', angry: 'sad', neutral: 'happy' };
+
+window.boot = async spec => {
+  SPEC = spec;
+  const fonts = [['Fredoka', '../../fonts/Fredoka-600.woff2', 600], ['Fredoka', '../../fonts/Fredoka-700.woff2', 700],
+    ['NotoDeva', '../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-600-normal.woff2', 600],
+    ['NotoDeva', '../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-700-normal.woff2', 700]];
+  for (const [fam, url, w] of fonts) { try { document.fonts.add(await new FontFace(fam, `url(${url})`, { weight: String(w) }).load()); } catch (e) { console.warn('font', url, e); } }
+  spec.characters.forEach(c => { CH[c.id] = c; });
+  spec.places.forEach(p => { PL[p.id] = p; });
+  window.READY = true;
+};
+
+const lookOf = id => { const c = CH[id]; return c && c.look && CAST[c.look] ? CAST[c.look] : null; };
+const activeLine = (shot, t) => shot.lines.find(l => t >= l.start && t < l.end);
+function talkAmount(line, t) {
+  if (!line) return 0;
+  const i = Math.floor((t - line.start) * 30);
+  if (line.env && line.env.length) return line.env[Math.min(i, line.env.length - 1)] || 0;
+  return 0.35 + 0.35 * Math.sin(t * 22) * Math.sin(t * 7); // no audio yet: fake chatter
+}
+function moodOf(shot, id, t) { // last emotion this character expressed in the shot
+  const said = shot.lines.filter(l => l.speaker === id && l.start <= t);
+  const e = said.length ? said[said.length - 1].emotion : 'neutral';
+  return EXPR[e] || 'happy';
+}
+
+// ---------- backgrounds ----------
+function bg(scene, lt, place) {
+  switch (scene) {
+    case 'town':
+      sky(ctx, lt); hills(ctx, 1150);
+      tree(ctx, 330, 1190, .9); tree(ctx, 760, 1180, .8);
+      house(ctx, 40, 1200, 220, 170, '#fff1d6', '#ff9e9e'); house(ctx, 820, 1200, 210, 160, '#e6f4ff', '#ffb347');
+      ground(ctx, 1190, '#c5eab3', '#b6e2a1');
+      ctx.fillStyle = '#f2dcb5'; ctx.beginPath(); ctx.moveTo(420, H); ctx.lineTo(500, 1190); ctx.lineTo(580, 1190); ctx.lineTo(700, H); ctx.fill();
+      break;
+    case 'room': room(ctx); break;
+    case 'hostel':
+      room(ctx, '#efe6ff', '#d9c8f0');
+      for (let i = 0; i < 14; i++) { const x = 60 + i * 70, y = 300 + Math.sin(i * .9) * 30; ctx.fillStyle = `rgba(255,${200 + (i % 3) * 20},120,${.6 + .4 * Math.abs(Math.sin(lt * 3 + i))})`; ell(ctx, x, y, 12, 12); ctx.fill(); }
+      break;
+    case 'city': {
+      gradientBg(ctx, ['#a9c8ff', '#dfe8ff', '#ffe1ec']); clouds(ctx, lt, [260, 420]);
+      skyline(ctx, 1150, .55, ['#b9c3e8', '#a8b4df', '#cbd3f2']); skyline(ctx, 1190, 1, ['#8f9fd6', '#7d8ecb', '#a3b0e0']);
+      ctx.fillStyle = '#7b7f95'; ctx.fillRect(0, 1190, W, H);
+      ctx.fillStyle = '#fff'; for (let x = (-lt * 400) % 160; x < W; x += 160) ctx.fillRect(x, 1250, 80, 10);
+      ctx.fillStyle = '#c9c4d6'; ctx.fillRect(0, 1290, W, H);
+      break;
+    }
+    case 'college':
+      sky(ctx, lt); skyline(ctx, 1000, .6);
+      college(ctx, W / 2, 1180, (place?.name || 'COLLEGE').toUpperCase());
+      ground(ctx, 1190, '#c5eab3', '#b6e2a1');
+      break;
+    case 'station':
+      sky(ctx, lt); skyline(ctx, 1000, .5);
+      train(ctx, 120, 1080, '#6ea8fe');
+      ctx.fillStyle = '#b8b2c6'; ctx.fillRect(0, 1100, W, H); ctx.fillStyle = '#ffd84d'; ctx.fillRect(0, 1100, W, 16);
+      break;
+    case 'night': nightSky(ctx, lt); break;
+    default: sky(ctx, lt); ground(ctx, 1200, '#ffd1dc', '#ffc2d1');
+  }
+}
+
+function castRow(shot, t, lt, y = 1250) {
+  const ids = (shot.characters || []).filter(lookOf); const n = ids.length; const line = activeLine(shot, t); const pos = {};
+  ids.forEach((id, i) => {
+    const x = n === 1 ? 540 : 200 + i * (680 / (n - 1)); pos[id] = x;
+    const s = n >= 3 ? 0.95 : 1.08; const speaking = line && line.speaker === id;
+    const enter = ease.out(prog(lt, i * 0.12, 0.6));
+    ctx.globalAlpha = enter;
+    chibi(ctx, x, y + (1 - enter) * 60, s * (speaking ? 1.03 : 1), lookOf(id),
+      { t: lt, phase: i * 1.3, expr: moodOf(shot, id, t), talk: speaking ? talkAmount(line, t) : 0, wave: shot.params?.wave === id && lt > .6 && lt < 2.6 });
+    ctx.globalAlpha = 1;
+  });
+  return pos;
+}
+
+// ---------- templates (world layer) ----------
+const T = {
+  hook(shot, t, lt) {
+    gradientBg(ctx, ['#2a1f5c', '#6b3fa0', '#ff7aa8']); hearts(ctx, lt, 14, 5, .45);
+    const pos = castRow({ ...shot, characters: shot.characters.slice(0, 2) }, t, lt, 1330);
+    if (Object.keys(pos).length === 2) { const k = .9 + .12 * Math.sin(lt * 6); heart(ctx, W / 2, 1040, 1.4 * k, C.rose); }
+    wifi(ctx, W / 2, 900, lt, .45);
+  },
+  scene(shot, t, lt) {
+    const place = PL[shot.location]; bg(place?.scene, lt, place);
+    castRow(shot, t, lt);
+    if (shot.params?.showLocation && place) locationChip(ctx, place.name, 420, prog(lt, .2, .5));
+  },
+  train(shot, t, lt) {
+    sunsetSky(ctx, lt);
+    skyline(ctx, 1080, .55 + .45 * prog(lt, 0, 3), ['#d6b8e8', '#c4a6e0', '#e6c8f0']);
+    hills(ctx, 1120, '#c9a8d8', '#b898cc');
+    ctx.fillStyle = '#9a86b0'; ctx.fillRect(0, 1130, W, 18); ctx.fillStyle = '#7a6890'; for (let x = (-lt * 300) % 60; x < W; x += 60) ctx.fillRect(x, 1148, 30, 10);
+    const who = lookOf(shot.characters[0]); const line = activeLine(shot, t);
+    train(ctx, lerp(-700, 520, Math.min(1, lt / Math.max(shot.dur, 3))), 1130, '#ff8fab', who ? { look: who, t: lt, expr: moodOf(shot, shot.characters[0], t) } : null);
+    ground(ctx, 1180, '#b898cc', '#a888bc');
+    const place = PL[shot.location]; if (place) locationChip(ctx, place.name, 420, prog(lt, .4, .5));
+  },
+  split(shot, t, lt) {
+    const [a, b] = shot.characters; const p = shot.params || {};
+    const sl = ease.out(prog(lt, 0, .6)), sr = ease.out(prog(lt, .35, .6));
+    const side = (id, clipPts, colors, gcol, accent, lab, x, off) => {
+      ctx.save(); ctx.translate(off, 0); ctx.beginPath(); clipPts.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py))); ctx.closePath(); ctx.clip();
+      gradientBg(ctx, colors); ground(ctx, 1190, gcol);
+      if (lab) { chip(ctx, lab.label || '', x, 470, 1, accent, '#fff', 40); if (lab.sub) chip(ctx, lab.sub, x, 560, 1, '#fff', accent, 34); }
+      if (lookOf(id)) { const line = activeLine(shot, t); chibi(ctx, x, 1260, 1, lookOf(id), { t: lt, phase: x, expr: moodOf(shot, id, t), talk: line?.speaker === id ? talkAmount(line, t) : 0 });
+        nameTag(ctx, CH[id].name, x, 800, prog(lt, .9, .4), accent); }
+      ctx.restore();
+    };
+    side(a, [[0, 0], [580, 0], [500, H], [0, H]], ['#ffd6e7', '#ffe9f1'], '#ffc2d4', C.rose, p.left, 270, lerp(-W / 2, 0, sl));
+    side(b, [[588, 0], [W, 0], [W, H], [508, H]], ['#cde9ff', '#e6f3ff'], '#a9d3ff', '#4a7fd8', p.right, 810, lerp(W / 2, 0, sr));
+  },
+  cliffhanger(shot, t, lt) {
+    nightSky(ctx, lt); hearts(ctx, lt, 8, 21, .35);
+    ctx.globalAlpha = prog(lt, .1, .5); wifi(ctx, W / 2, 620, lt, 1.1); ctx.globalAlpha = 1;
+  },
+};
+
+// ---------- UI layer (not affected by camera) ----------
+function hookText(text, lt) {
+  ctx.save(); ctx.font = '700 86px Fredoka, NotoDeva, sans-serif';
+  const lines = wrap(ctx, text, 900);
+  lines.forEach((ln, i) => bigText(ctx, ln, W / 2, 470 + i * 112, 86, ease.back(prog(lt, i * .12, .3)), '#fff', C.rose));
+  ctx.restore();
+}
+function cliffText(shot, lt) {
+  const p = shot.params || {}; const lines = p.text || [];
+  lines.forEach((ln, i) => { let size = i === lines.length - 1 ? 84 : 70; ctx.font = `700 ${size}px Fredoka, NotoDeva, sans-serif`;
+    while (ctx.measureText(ln).width * 1.1 > 960 && size > 40) { size -= 4; ctx.font = `700 ${size}px Fredoka, NotoDeva, sans-serif`; }
+    bigText(ctx, ln, W / 2, 860 + i * 100, size, ease.back(prog(lt, .4 + i * .5, .5)), '#fff', i === lines.length - 1 ? C.rose : '#45337a'); });
+  const ny = 860 + lines.length * 100 + 50, nk = .6 + lines.length * .5;
+  if (p.next) chip(ctx, 'NEXT  ·  ' + p.next, W / 2, ny, ease.back(prog(lt, nk, .5)), '#45337a', '#fff', 36);
+  if (SPEC.cta) ctaButton(SPEC.cta, W / 2, ny + 120, prog(lt, nk + .4, .5), lt);
+}
+// platform call-to-action: Instagram "+ FOLLOW", YouTube "🔔 SUBSCRIBE"
+function ctaButton(cta, x, y, k, lt) {
+  if (k <= 0) return; const pulse = 1 + .05 * Math.sin(lt * 7);
+  ctx.save(); ctx.translate(x, y); ctx.scale(ease.back(k) * pulse, ease.back(k) * pulse);
+  ctx.font = '700 46px Fredoka, NotoDeva, sans-serif'; const tw = ctx.measureText(cta.text).width, w = tw + 150, hh = 104;
+  ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
+  rr(ctx, -w / 2, -hh / 2, w, hh, hh / 2);
+  if (cta.icon === 'plus') { const g = ctx.createLinearGradient(-w / 2, 0, w / 2, 0); g.addColorStop(0, '#feda75'); g.addColorStop(.35, '#fa7e1e'); g.addColorStop(.65, '#d62976'); g.addColorStop(1, '#962fbf'); ctx.fillStyle = g; }
+  else ctx.fillStyle = cta.color;
+  ctx.fill(); ctx.shadowColor = 'transparent';
+  const ix = -w / 2 + 62; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+  if (cta.icon === 'plus') { ctx.beginPath(); ctx.moveTo(ix - 18, 0); ctx.lineTo(ix + 18, 0); ctx.moveTo(ix, -18); ctx.lineTo(ix, 18); ctx.stroke(); }
+  else { const sw = Math.sin(lt * 12) * .25; ctx.save(); ctx.translate(ix, -4); ctx.rotate(sw); ctx.beginPath(); ctx.moveTo(-20, 14); ctx.quadraticCurveTo(-20, -22, 0, -22); ctx.quadraticCurveTo(20, -22, 20, 14); ctx.closePath(); ctx.fill(); ctx.fillRect(-24, 12, 48, 7); ell(ctx, 0, 24, 7, 7); ctx.fill(); ctx.restore(); }
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(cta.text, ix + 42, 3);
+  // tap hand hint
+  const tx = w / 2 - 20 + Math.sin(lt * 5) * 8, ty = 40 + Math.abs(Math.sin(lt * 5)) * 10;
+  ctx.fillStyle = '#fff'; ell(ctx, tx, ty, 22, 22); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.stroke();
+  ctx.restore();
+}
+function banner(ep) {
+  ctx.save(); ctx.font = '700 40px Fredoka, NotoDeva, sans-serif';
+  const a = 'Strangers to ', b = 'Forever', wa = ctx.measureText(a).width, wb = ctx.measureText(b).width, w = wa + wb + 70;
+  rr(ctx, W / 2 - w / 2, 214, w, 76, 18); ctx.fillStyle = '#0b1a7a'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.stroke();
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.fillText(a, W / 2 - w / 2 + 35, 254); ctx.fillStyle = '#ffc93c'; ctx.fillText(b, W / 2 - w / 2 + 35 + wa, 254);
+  chip(ctx, `EP ${ep.num}`, W / 2 + w / 2 - 10, 300, 1, C.rose, '#fff', 26);
+  ctx.restore();
+}
+function dialogue(shot, t, pos) {
+  const line = activeLine(shot, t); if (!line || !line.text) return;
+  const lt = t - line.start;
+  if (line.speaker === 'narrator' || pos[line.speaker] === undefined) {
+    caption(ctx, line.text, lt, { delay: 0, accent: shot.template === 'cliffhanger' ? C.lav : C.pink, y: shot.template === 'cliffhanger' ? 1560 : 1470 });
+  } else {
+    const x = Math.max(330, Math.min(750, pos[line.speaker]));
+    bubble(ctx, line.text, x, 610, 640, prog(lt, 0, .25), [pos[line.speaker], 760], { size: 44 });
+    chip(ctx, CH[line.speaker]?.name || '', x - 250, 520, ease.back(prog(lt, 0, .3)), CH[line.speaker]?.color || C.rose, '#fff', 30);
+  }
+}
+function speakerPositions(shot) {
+  if (shot.template === 'split') return { [shot.characters[0]]: 270, [shot.characters[1]]: 810 };
+  if (shot.template === 'train' || shot.template === 'cliffhanger') return {};
+  const ids = (shot.characters || []).filter(lookOf); const n = ids.length; const pos = {};
+  const list = shot.template === 'hook' ? ids.slice(0, 2) : ids;
+  list.forEach((id, i) => { pos[id] = list.length === 1 ? 540 : 200 + i * (680 / (list.length - 1)); });
+  return pos;
+}
+
+window.renderFrame = (t, fmt = 'image/jpeg') => {
+  const shots = SPEC.shots; let i = shots.findIndex(s => t < s.start + s.dur); if (i < 0) i = shots.length - 1;
+  const shot = shots[i], lt = t - shot.start;
+  ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  const z = 1 + 0.045 * Math.min(1, lt / shot.dur); // slow push-in on every shot
+  ctx.translate(W / 2, H * 0.55); ctx.scale(z, z); ctx.translate(-W / 2, -H * 0.55);
+  (T[shot.template] || T.scene)(shot, t, lt);
+  ctx.restore();
+  if (shot.template === 'hook' && shot.params?.hook) hookText(shot.params.hook, lt);
+  if (shot.template === 'cliffhanger') cliffText(shot, lt);
+  dialogue(shot, t, speakerPositions(shot));
+  banner(SPEC.episode);
+  const fin = i === 0 ? 1 : clamp(lt / .22), fout = i === shots.length - 1 ? clamp((shot.dur - lt) / .5) : clamp((shot.dur - lt) / .22);
+  const a = 1 - Math.min(fin, fout);
+  if (a > 0) { ctx.fillStyle = `rgba(255,236,244,${a})`; ctx.fillRect(0, 0, W, H); }
+  return ctx.canvas.toDataURL(fmt, .92);
+};

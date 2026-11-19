@@ -118,7 +118,14 @@ function chibi(ctx, x, y, s, look, o = {}) {
   ell(ctx, -58, ey + 30, 17, 10); ctx.fill(); ell(ctx, 58, ey + 30, 17, 10); ctx.fill();
   // mouth
   const my = ey + 42; ctx.lineWidth = 5; ctx.strokeStyle = C.ink;
-  if (expr === 'sad') { ctx.beginPath(); ctx.arc(0, my + 12, 12, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
+  const talk = o.talk || 0;
+  if (talk > 0.06) { // lip-sync: mouth opens with the voice loudness
+    const mh = 6 + talk * 22, mw = 10 + talk * 4;
+    ell(ctx, 0, my + 2, mw, mh / 2); ctx.fillStyle = '#7a2e4a'; ctx.fill();
+    ctx.save(); ctx.clip(); ctx.fillStyle = '#ff8fa3'; ell(ctx, 0, my + 2 + mh * 0.35, mw * 0.8, mh * 0.3); ctx.fill(); ctx.restore();
+    ctx.lineWidth = 4; ctx.strokeStyle = C.ink; ell(ctx, 0, my + 2, mw, mh / 2); ctx.stroke();
+  }
+  else if (expr === 'sad') { ctx.beginPath(); ctx.arc(0, my + 12, 12, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
   else if (expr === 'shock') { ell(ctx, 0, my + 4, 9, 12); ctx.fillStyle = '#7a2e4a'; ctx.fill(); }
   else if (expr === 'smirk') { ctx.beginPath(); ctx.moveTo(-10, my + 2); ctx.quadraticCurveTo(6, my + 8, 16, my - 4); ctx.stroke(); }
   else if (expr === 'joy') { ctx.beginPath(); ctx.arc(0, my - 2, 15, 0, Math.PI); ctx.closePath(); ctx.fillStyle = '#7a2e4a'; ctx.fill(); }
@@ -165,7 +172,7 @@ function college(ctx, cx, baseY, name) {
   for (let i = 0; i < 6; i++) { rr(ctx, x + 60 + i * 150, baseY - h + 160, 28, h - 160, 8); fillStroke(ctx, '#fff7ee', 5); }
   for (let r = 0; r < 2; r++) for (let i = 0; i < 5; i++) { rr(ctx, x + 112 + i * 150, baseY - h + 180 + r * 150, 70, 90, 10); fillStroke(ctx, '#bfe3ff', 5); }
   rr(ctx, cx - 330, baseY - h - 20, 660, 90, 20); fillStroke(ctx, '#5b4a8a');
-  ctx.fillStyle = '#fff'; ctx.font = '700 38px Fredoka'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(name, cx, baseY - h + 25);
+  ctx.fillStyle = '#fff'; let fs = 38; do { ctx.font = `700 ${fs}px Fredoka, NotoDeva, sans-serif`; fs -= 2; } while (ctx.measureText(name).width > 620 && fs > 16); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(name, cx, baseY - h + 25);
 }
 function room(ctx, wall = '#ffe9d6', floor = '#e8c4a0') {
   ctx.fillStyle = wall; ctx.fillRect(0, 0, W, H); ctx.fillStyle = 'rgba(255,255,255,.35)'; for (let x = 0; x < W; x += 90) ctx.fillRect(x, 0, 40, 1200);
@@ -187,7 +194,7 @@ function hearts(ctx, t, n = 12, seed = 1, alpha = .55) {
 function wrap(ctx, text, maxW) { const words = text.split(' '); const lines = []; let cur = ''; for (const w of words) { const tst = cur ? cur + ' ' + w : w; if (ctx.measureText(tst).width > maxW && cur) { lines.push(cur); cur = w; } else cur = tst; } if (cur) lines.push(cur); return lines; }
 function caption(ctx, text, t, o = {}) {
   const a = ease.out(prog(t, o.delay ?? .2, .45)); if (a <= 0) return;
-  const size = o.size || 52; ctx.save(); ctx.font = `600 ${size}px Fredoka`;
+  const size = o.size || 52; ctx.save(); ctx.font = `600 ${size}px Fredoka, NotoDeva, sans-serif`;
   const lines = wrap(ctx, text, 840), lh = size * 1.32, h = lines.length * lh + 64, y = (o.y || 1440) - h / 2 + (1 - a) * 40;
   ctx.globalAlpha = a; ctx.shadowColor = 'rgba(120,60,90,.28)'; ctx.shadowBlur = 34; ctx.shadowOffsetY = 12;
   rr(ctx, 70, y, 940, h, 46); ctx.fillStyle = 'rgba(255,255,255,.96)'; ctx.fill(); ctx.shadowColor = 'transparent';
@@ -199,18 +206,18 @@ function caption(ctx, text, t, o = {}) {
   ctx.restore();
 }
 function bigText(ctx, text, x, y, size, k = 1, fill = '#fff', stroke = C.rose) {
-  if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.font = `700 ${size}px Fredoka`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.font = `700 ${size}px Fredoka, NotoDeva, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round'; ctx.lineWidth = size * .16; ctx.strokeStyle = stroke; ctx.strokeText(text, 0, 0); ctx.fillStyle = fill; ctx.fillText(text, 0, 0); ctx.restore();
 }
 function chip(ctx, text, x, y, k = 1, bg = C.rose, fg = '#fff', size = 40) {
-  if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.font = `700 ${size}px Fredoka`; const w = ctx.measureText(text).width + size * 1.4;
+  if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.font = `700 ${size}px Fredoka, NotoDeva, sans-serif`; const w = ctx.measureText(text).width + size * 1.4;
   rr(ctx, -w / 2, -size * .9, w, size * 1.8, size * .9); ctx.fillStyle = bg; ctx.fill(); ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 0, 2); ctx.restore();
 }
 function nameTag(ctx, text, x, y, k, color = C.rose) { chip(ctx, text, x, y, ease.back(k), '#fff', color, 36); }
 function pin(ctx, x, y, s = 1) { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.beginPath(); ctx.arc(0, -20, 22, Math.PI, 0); ctx.lineTo(0, 22); ctx.closePath(); ctx.fillStyle = '#fff'; ctx.fill(); ell(ctx, 0, -20, 8, 8); ctx.fillStyle = C.rose; ctx.fill(); ctx.restore(); }
-function locationChip(ctx, text, y, k) { if (k <= 0) return; ctx.save(); ctx.font = '700 46px Fredoka'; const w = ctx.measureText(text).width + 120; ctx.translate(W / 2, y); ctx.scale(ease.back(k), ease.back(k)); rr(ctx, -w / 2, -46, w, 92, 46); ctx.fillStyle = C.rose; ctx.fill(); pin(ctx, -w / 2 + 50, 0, .9); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 25, 2); ctx.restore(); }
+function locationChip(ctx, text, y, k) { if (k <= 0) return; ctx.save(); ctx.font = '700 46px Fredoka, NotoDeva, sans-serif'; const w = ctx.measureText(text).width + 120; ctx.translate(W / 2, y); ctx.scale(ease.back(k), ease.back(k)); rr(ctx, -w / 2, -46, w, 92, 46); ctx.fillStyle = C.rose; ctx.fill(); pin(ctx, -w / 2 + 50, 0, .9); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 25, 2); ctx.restore(); }
 function bubble(ctx, text, x, y, w, k, tail, o = {}) {
-  if (k <= 0) return; const kk = ease.back(k); ctx.save(); ctx.font = `600 ${o.size || 46}px Fredoka`; const lines = wrap(ctx, text, w - 60); const lh = (o.size || 46) * 1.25, h = lines.length * lh + 50;
+  if (k <= 0) return; const kk = ease.back(k); ctx.save(); ctx.font = `600 ${o.size || 46}px Fredoka, NotoDeva, sans-serif`; const lines = wrap(ctx, text, w - 60); const lh = (o.size || 46) * 1.25, h = lines.length * lh + 50;
   ctx.translate(x, y); ctx.scale(kk, kk);
   if (o.thought) { [[tail[0] - x, tail[1] - y, 12], [(tail[0] - x) * .6, (tail[1] - y) * .6 + h * .2, 20]].forEach(([a, b, r]) => { ell(ctx, a, b, r, r); fillStroke(ctx, '#fff', 5); }); }
   rr(ctx, -w / 2, -h / 2, w, h, o.thought ? h / 2 : 36); fillStroke(ctx, '#fff', 6);

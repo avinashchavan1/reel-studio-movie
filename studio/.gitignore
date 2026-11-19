@@ -1,0 +1,7 @@
+node_modules/
+dist/
+data/private/
+data/media/renders/
+data/media/previews/
+data/media/exports/
+*.tsbuildinfo
