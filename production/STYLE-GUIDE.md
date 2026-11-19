@@ -26,29 +26,29 @@ expressive faces, 9:16 vertical composition, no text except signboards, high det
 
 Prompt format: `Character reference sheet, full body front view and 3/4 view, plain white background, <description>. <style block>`
 
-**TARA (lead, 18)**: young Indian woman, slim, fair-wheatish skin, big expressive dark eyes, small black bindi,
+**ISHITA (lead, 18)**: young Indian woman, slim, fair-wheatish skin, big expressive dark eyes, small black bindi,
 long dark-brown hair in a low side-braid, small pink hair clip, simple gold stud earrings. Outfit: dusty-pink
 salwar kurta with a matching pink dupatta, brown flat sandals, black college backpack. Shy, gentle expression.
 
-**KABIR (lead, 18)**: young Indian man, lean, warm brown skin, short messy black hair with a slight quiff,
+**VIHAAN (lead, 18)**: young Indian man, lean, warm brown skin, short messy black hair with a slight quiff,
 thick eyebrows, light stubble, confident half-smile. Outfit: sky-blue checked shirt, sleeves rolled, over a white
 tee, dark jeans, white sneakers, grey backpack on one shoulder, wired earphones around his neck.
 
 **ZOYA (best friend, 18)**: young Indian woman, round face, round black glasses, curly brown hair in a high bun,
 cheerful wide grin. Outfit: lavender kurti, blue jeans, a tote bag, always holding a phone or snack.
 
-**PIHU (classmate, 18)**: petite Indian girl, two short braids, mint-green kurti, white leggings, holding a phone.
+**TANVI (classmate, 18)**: petite Indian girl, two short braids, mint-green kurti, white leggings, holding a phone.
 
 **APPA (father, 50)**: Indian man, neat moustache, greying side hair, spectacles, cream half-sleeve shirt, strict but loving.
 
 **AMMA (mother, 45)**: Indian woman, hair in a bun with jasmine flowers, green cotton saree with gold border, red bindi, warm worried smile.
 
 ## Recurring sets
-- **Chandangaon**: small Indian town lane, tiled-roof houses, a kirana shop, electric poles and wires, mango tree, autos and scooters.
-- **Tara's home**: modest living room, cream walls, wall calendar, framed family photo, steel tumblers on a table.
-- **Chandangaon Junction / Neelpur Central**: Indian railway platform, yellow edge line, departure board, two trains.
-- **Neelpur**: busy Indian metro city, flyovers, glass towers, traffic, metro line.
-- **Skyline Institute of Technology**: big red-brick gate with the sign "SKYLINE INSTITUTE OF TECHNOLOGY", a cream
+- **<hometown, to be chosen>**: small Indian town lane, tiled-roof houses, a kirana shop, electric poles and wires, mango tree, autos and scooters.
+- **Ishita's home**: modest living room, cream walls, wall calendar, framed family photo, steel tumblers on a table.
+- **<hometown> station / Bangalore City station**: Indian railway platform, yellow edge line, departure board, two trains.
+- **Bangalore**: busy Indian metro city, flyovers, glass towers, traffic, metro line.
+- **Silicon Valley Institute of Technology**: big red-brick gate with the sign "SILICON VALLEY INSTITUTE OF TECHNOLOGY", a cream
   colonial-style main building, green lawns; **Lotus Block** (pink trim) and **Orchid Block** (blue trim).
 
 ## Title banner (same on every episode)
