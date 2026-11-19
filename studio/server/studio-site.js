@@ -44,7 +44,7 @@ export async function buildStudioSite() {
   w('hub', { url: hubCfg.url || null, lastDeploy: hubCfg.lastDeploy || null, pin: !!pinHash });
   w('pin', { pin: pinHash });
   for (const d of ['renders', 'audio', 'music']) if (fs.existsSync(path.join(MEDIA, d))) cp(path.join(MEDIA, d), path.join(OUT, 'media', d));
-  cp(path.join(REPO, 'engine', 'engine.js'), path.join(OUT, 'engine', 'engine.js'));
+  for (const e of ['engine.js', 'engine2.js', 'scenes2.js']) cp(path.join(REPO, 'engine', e), path.join(OUT, 'engine', e));
   cp(path.join(REPO, 'fonts'), path.join(OUT, 'fonts'));
   fs.writeFileSync(path.join(OUT, '_redirects'), '/*  /index.html  200\n');
   fs.writeFileSync(path.join(OUT, '_headers'), '/*\n  X-Robots-Tag: noindex, nofollow\n/snapshot/*\n  Cache-Control: no-cache\n');

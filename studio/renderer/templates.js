@@ -14,7 +14,9 @@ window.boot = async spec => {
   window.READY = true;
 };
 
-const lookOf = id => { const c = CH[id]; return c && c.look && CAST[c.look] ? CAST[c.look] : null; };
+const LOOK2 = { tara: 'ishita', kabir: 'vihaan', zoya: 'zoya', pihu: 'tanvi', appa: 'appa', amma: 'amma' };
+const lookOf = id => { const c = CH[id]; if (!c || !c.look) return null; return CAST2[c.look] || CAST2[LOOK2[c.look]] || null; };
+const emoOf = (shot, id, t) => { const said = shot.lines.filter(l => l.speaker === id && l.start <= t); return said.length ? said[said.length - 1].emotion || 'neutral' : 'neutral'; };
 const activeLine = (shot, t) => shot.lines.find(l => t >= l.start && t < l.end);
 function talkAmount(line, t) {
   if (!line) return 0;
@@ -31,50 +33,29 @@ function moodOf(shot, id, t) { // last emotion this character expressed in the s
 // ---------- backgrounds ----------
 function bg(scene, lt, place) {
   switch (scene) {
-    case 'town':
-      sky(ctx, lt); hills(ctx, 1150);
-      tree(ctx, 330, 1190, .9); tree(ctx, 760, 1180, .8);
-      house(ctx, 40, 1200, 220, 170, '#fff1d6', '#ff9e9e'); house(ctx, 820, 1200, 210, 160, '#e6f4ff', '#ffb347');
-      ground(ctx, 1190, '#c5eab3', '#b6e2a1');
-      ctx.fillStyle = '#f2dcb5'; ctx.beginPath(); ctx.moveTo(420, H); ctx.lineTo(500, 1190); ctx.lineTo(580, 1190); ctx.lineTo(700, H); ctx.fill();
-      break;
-    case 'room': room(ctx); break;
-    case 'hostel':
-      room(ctx, '#efe6ff', '#d9c8f0');
-      for (let i = 0; i < 14; i++) { const x = 60 + i * 70, y = 300 + Math.sin(i * .9) * 30; ctx.fillStyle = `rgba(255,${200 + (i % 3) * 20},120,${.6 + .4 * Math.abs(Math.sin(lt * 3 + i))})`; ell(ctx, x, y, 12, 12); ctx.fill(); }
-      break;
-    case 'city': {
-      gradientBg(ctx, ['#a9c8ff', '#dfe8ff', '#ffe1ec']); clouds(ctx, lt, [260, 420]);
-      skyline(ctx, 1150, .55, ['#b9c3e8', '#a8b4df', '#cbd3f2']); skyline(ctx, 1190, 1, ['#8f9fd6', '#7d8ecb', '#a3b0e0']);
-      ctx.fillStyle = '#7b7f95'; ctx.fillRect(0, 1190, W, H);
-      ctx.fillStyle = '#fff'; for (let x = (-lt * 400) % 160; x < W; x += 160) ctx.fillRect(x, 1250, 80, 10);
-      ctx.fillStyle = '#c9c4d6'; ctx.fillRect(0, 1290, W, H);
-      break;
-    }
-    case 'college':
-      sky(ctx, lt); skyline(ctx, 1000, .6);
-      college(ctx, W / 2, 1180, (place?.name || 'COLLEGE').toUpperCase());
-      ground(ctx, 1190, '#c5eab3', '#b6e2a1');
-      break;
-    case 'station':
-      sky(ctx, lt); skyline(ctx, 1000, .5);
-      train(ctx, 120, 1080, '#6ea8fe');
-      ctx.fillStyle = '#b8b2c6'; ctx.fillRect(0, 1100, W, H); ctx.fillStyle = '#ffd84d'; ctx.fillRect(0, 1100, W, 16);
-      break;
-    case 'night': nightSky(ctx, lt); break;
+    case 'town': sceneTown(ctx, lt); break;
+    case 'room': sceneHome(ctx, lt); break;
+    case 'hostel': sceneHostel(ctx, lt); break;
+    case 'city': sceneCity(ctx, lt); break;
+    case 'college': sceneCollege(ctx, lt, (place?.name || 'COLLEGE').toUpperCase()); break;
+    case 'station': scenePlatform(ctx, lt); break;
+    case 'night': nightSky(ctx, lt); atmosphere(ctx, 'night'); break;
     default: sky(ctx, lt); ground(ctx, 1200, '#ffd1dc', '#ffc2d1');
   }
 }
 
-function castRow(shot, t, lt, y = 1250) {
+function castRow(shot, t, lt, y = 1300, scaleOverride) {
   const ids = (shot.characters || []).filter(lookOf); const n = ids.length; const line = activeLine(shot, t); const pos = {};
+  ids.forEach((id, i) => { pos[id] = n === 1 ? 540 : 210 + i * (660 / (n - 1)); });
+  const s0 = scaleOverride || (n === 1 ? 1.12 : n === 2 ? 1.05 : .92);
   ids.forEach((id, i) => {
-    const x = n === 1 ? 540 : 200 + i * (680 / (n - 1)); pos[id] = x;
-    const s = n >= 3 ? 0.95 : 1.08; const speaking = line && line.speaker === id;
-    const enter = ease.out(prog(lt, i * 0.12, 0.6));
+    const x = pos[id]; const speaking = line && line.speaker === id;
+    const target = line && pos[line.speaker] !== undefined && !speaking ? pos[line.speaker] : (n > 1 ? 540 : x);
+    const look = Math.max(-1, Math.min(1, (target - x) / 200));
+    const enter = ease.out(prog(lt, i * .12, .6));
     ctx.globalAlpha = enter;
-    chibi(ctx, x, y + (1 - enter) * 60, s * (speaking ? 1.03 : 1), lookOf(id),
-      { t: lt, phase: i * 1.3, expr: moodOf(shot, id, t), talk: speaking ? talkAmount(line, t) : 0, wave: shot.params?.wave === id && lt > .6 && lt < 2.6 });
+    hero(ctx, x, y + (1 - enter) * 60, s0, lookOf(id), { t: lt, phase: i * 1.3, emo: emoOf(shot, id, t), talk: speaking ? talkAmount(line, t) : 0, look,
+      pose: shot.params?.wave === id && lt > .6 && lt < 2.6 ? 'wave' : undefined });
     ctx.globalAlpha = 1;
   });
   return pos;
@@ -84,9 +65,9 @@ function castRow(shot, t, lt, y = 1250) {
 const T = {
   hook(shot, t, lt) {
     gradientBg(ctx, ['#2a1f5c', '#6b3fa0', '#ff7aa8']); hearts(ctx, lt, 14, 5, .45);
-    const pos = castRow({ ...shot, characters: shot.characters.slice(0, 2) }, t, lt, 1330);
-    if (Object.keys(pos).length === 2) { const k = .9 + .12 * Math.sin(lt * 6); heart(ctx, W / 2, 1040, 1.4 * k, C.rose); }
-    wifi(ctx, W / 2, 900, lt, .45);
+    const pos = castRow({ ...shot, characters: shot.characters.slice(0, 2) }, t, lt, 1340, .84);
+    if (Object.keys(pos).length === 2) { const k = .9 + .12 * Math.sin(lt * 6); heart(ctx, W / 2, 1060, 1.3 * k, C.rose); }
+    wifi(ctx, W / 2, 930, lt, .4);
   },
   scene(shot, t, lt) {
     const place = PL[shot.location]; bg(place?.scene, lt, place);
@@ -99,7 +80,8 @@ const T = {
     hills(ctx, 1120, '#c9a8d8', '#b898cc');
     ctx.fillStyle = '#9a86b0'; ctx.fillRect(0, 1130, W, 18); ctx.fillStyle = '#7a6890'; for (let x = (-lt * 300) % 60; x < W; x += 60) ctx.fillRect(x, 1148, 30, 10);
     const who = lookOf(shot.characters[0]); const line = activeLine(shot, t);
-    train(ctx, lerp(-700, 520, Math.min(1, lt / Math.max(shot.dur, 3))), 1130, '#ff8fab', who ? { look: who, t: lt, expr: moodOf(shot, shot.characters[0], t) } : null);
+    train(ctx, lerp(-700, 520, Math.min(1, lt / Math.max(shot.dur, 3))), 1130, '#ff8fab', null);
+    if (who) { const tx = lerp(-700, 520, Math.min(1, lt / Math.max(shot.dur, 3))) + 40 + 3 * 130; ctx.save(); ctx.beginPath(); ctx.roundRect(tx, 1130 - 145, 96, 70, 14); ctx.clip(); hero(ctx, tx + 48, 1130 + 150, .3, who, { t: lt, emo: emoOf(shot, shot.characters[0], t), look: .6 }); ctx.restore(); ctx.lineWidth = 5; ctx.strokeStyle = C.line; ctx.beginPath(); ctx.roundRect(tx, 1130 - 145, 96, 70, 14); ctx.stroke(); }
     ground(ctx, 1180, '#b898cc', '#a888bc');
     const place = PL[shot.location]; if (place) locationChip(ctx, place.name, 420, prog(lt, .4, .5));
   },
@@ -110,8 +92,8 @@ const T = {
       ctx.save(); ctx.translate(off, 0); ctx.beginPath(); clipPts.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py))); ctx.closePath(); ctx.clip();
       gradientBg(ctx, colors); ground(ctx, 1190, gcol);
       if (lab) { chip(ctx, lab.label || '', x, 470, 1, accent, '#fff', 40); if (lab.sub) chip(ctx, lab.sub, x, 560, 1, '#fff', accent, 34); }
-      if (lookOf(id)) { const line = activeLine(shot, t); chibi(ctx, x, 1260, 1, lookOf(id), { t: lt, phase: x, expr: moodOf(shot, id, t), talk: line?.speaker === id ? talkAmount(line, t) : 0 });
-        nameTag(ctx, CH[id].name, x, 800, prog(lt, .9, .4), accent); }
+      if (lookOf(id)) { const line = activeLine(shot, t); hero(ctx, x, 1300, .95, lookOf(id), { t: lt, phase: x, emo: emoOf(shot, id, t), talk: line?.speaker === id ? talkAmount(line, t) : 0, look: x < 540 ? .3 : -.3 });
+        nameTag(ctx, CH[id].name, x, 640, prog(lt, .9, .4), accent); }
       ctx.restore();
     };
     side(a, [[0, 0], [580, 0], [500, H], [0, H]], ['#ffd6e7', '#ffe9f1'], '#ffc2d4', C.rose, p.left, 270, lerp(-W / 2, 0, sl));
@@ -173,8 +155,8 @@ function dialogue(shot, t, pos) {
     caption(ctx, line.text, lt, { delay: 0, accent: shot.template === 'cliffhanger' ? C.lav : C.pink, y: shot.template === 'cliffhanger' ? 1560 : 1470 });
   } else {
     const x = Math.max(330, Math.min(750, pos[line.speaker]));
-    bubble(ctx, line.text, x, 610, 640, prog(lt, 0, .25), [pos[line.speaker], 760], { size: 44 });
-    chip(ctx, CH[line.speaker]?.name || '', x - 250, 520, ease.back(prog(lt, 0, .3)), CH[line.speaker]?.color || C.rose, '#fff', 30);
+    bubble(ctx, line.text, x, 455, 640, prog(lt, 0, .25), [pos[line.speaker], 560], { size: 44 });
+    chip(ctx, CH[line.speaker]?.name || '', x - 250, 370, ease.back(prog(lt, 0, .3)), CH[line.speaker]?.color || C.rose, '#fff', 30);
   }
 }
 function speakerPositions(shot) {
@@ -182,7 +164,7 @@ function speakerPositions(shot) {
   if (shot.template === 'train' || shot.template === 'cliffhanger') return {};
   const ids = (shot.characters || []).filter(lookOf); const n = ids.length; const pos = {};
   const list = shot.template === 'hook' ? ids.slice(0, 2) : ids;
-  list.forEach((id, i) => { pos[id] = list.length === 1 ? 540 : 200 + i * (680 / (list.length - 1)); });
+  list.forEach((id, i) => { pos[id] = list.length === 1 ? 540 : 210 + i * (660 / (list.length - 1)); });
   return pos;
 }
 
