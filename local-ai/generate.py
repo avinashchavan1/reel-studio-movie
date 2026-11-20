@@ -77,6 +77,24 @@ def qwen_workflow(pos, neg, seed, w=928, h=1664, fast=False):
     return wf
 
 
+def refine_workflow(image_name, pos, neg, seed, denoise=0.4, steps=50):
+    """Full Z-Image img2img pass over a chosen draft: keeps the face/composition, adds full-model detail."""
+    return {
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "z_image_bf16.safetensors", "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_3_4b.safetensors", "type": "lumina2", "device": "default"}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "z_image_ae.safetensors"}},
+        "4": {"class_type": "ModelSamplingAuraFlow", "inputs": {"model": ["1", 0], "shift": 3.0}},
+        "5": {"class_type": "CLIPTextEncode", "inputs": {"text": pos, "clip": ["2", 0]}},
+        "6": {"class_type": "CLIPTextEncode", "inputs": {"text": neg, "clip": ["2", 0]}},
+        "7": {"class_type": "LoadImage", "inputs": {"image": image_name}},
+        "11": {"class_type": "VAEEncode", "inputs": {"pixels": ["7", 0], "vae": ["3", 0]}},
+        "8": {"class_type": "KSampler", "inputs": {"model": ["4", 0], "positive": ["5", 0], "negative": ["6", 0], "latent_image": ["11", 0],
+                                                    "seed": seed, "steps": steps, "cfg": 4.0, "sampler_name": "res_multistep", "scheduler": "simple", "denoise": denoise}},
+        "9": {"class_type": "VAEDecode", "inputs": {"samples": ["8", 0], "vae": ["3", 0]}},
+        "10": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": "stf_final"}},
+    }
+
+
 def call(path, data=None):
     req = urllib.request.Request(SERVER + path, data=json.dumps(data).encode() if data else None, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=60) as r:
@@ -105,6 +123,8 @@ def main():
     ap.add_argument("-n", type=int, default=2, help="options per character per style")
     ap.add_argument("-m", choices=list(MODELS), default="zimage-hq")
     ap.add_argument("--size", default="832x1472", help="WxH; 832x1472 fits a 32 GB Mac comfortably, 1088x1920 is full reel size (needs lots of free RAM)")
+    ap.add_argument("--refine", metavar="PNG", help="refine a chosen draft with the full model (keeps the face); use with one character id")
+    ap.add_argument("--denoise", type=float, default=0.4, help="refine strength: 0.3 subtle .. 0.5 stronger")
     ap.add_argument("-s", "--style", default="all", help="zimage style: " + ", ".join(STYLES) + " or all")
     a = ap.parse_args()
     who = ["ishita", "vihaan"] if a.who == "leads" else list(cfg["characters"]) if a.who == "all" else [a.who]
@@ -114,6 +134,19 @@ def main():
         call("/system_stats")
     except Exception:
         raise SystemExit(f"ComfyUI is not running at {SERVER}. Start it in another terminal: bash local-ai/start-mac.sh")
+    if a.refine:
+        import shutil
+        c, st = who[0], (styles[0] if a.style != "all" else "anime")
+        inp = os.path.join(os.environ.get("STF_AI_DIR", os.path.expanduser("~/claude-projects/2-strangers/ai-studio")), "ComfyUI", "input")
+        os.makedirs(inp, exist_ok=True)
+        name = "stf_ref_" + os.path.basename(a.refine)
+        shutil.copy(a.refine, os.path.join(inp, name))
+        os.makedirs(os.path.join(HERE, "final"), exist_ok=True)
+        dest = os.path.join(HERE, "final", f"{c}-{st}-final.png")
+        t = time.time()
+        run(refine_workflow(name, f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", cfg["negative"], random.randint(1, 2**31), a.denoise), dest)
+        print(f"{os.path.relpath(dest, HERE)}  ({time.time() - t:.0f}s)", flush=True)
+        return
     for c in who:
         os.makedirs(os.path.join(HERE, "out", c), exist_ok=True)
         for st in (styles if a.m.startswith(("zimage", "qwen")) else [a.m]):
