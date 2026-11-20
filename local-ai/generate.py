@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Generate character design options with the local ComfyUI server (start it first: bash local-ai/start-mac.sh).
 
-  python3 local-ai/generate.py                       # Ishita + Vihaan, Z-Image Turbo drafts, 4 styles x 2 options
-  python3 local-ai/generate.py -m zimage-hq -s anime # full Z-Image, 40 steps (best quality, slower)
+  python3 local-ai/generate.py                       # Ishita + Vihaan, Qwen-Image 2.1 full (25 steps), 4 styles x 2 options
+  python3 local-ai/generate.py -m qwen-fast          # Qwen-Image 2.1 + turbo LoRA, 8 steps (drafts)
   python3 local-ai/generate.py ishita -s pixar -n 8  # 8 Pixar-style options of one character
   python3 local-ai/generate.py all -m noobai         # whole cast with the anime SDXL model
 
@@ -12,7 +12,7 @@ import argparse, json, os, random, time, urllib.request, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERVER = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
-MODELS = {"zimage": None, "zimage-hq": None, "noobai": "NoobAI-XL-v1.1.safetensors", "animagine": "animagine-xl-4.0-opt.safetensors"}
+MODELS = {"qwen": None, "qwen-fast": None, "zimage": None, "zimage-hq": None, "noobai": "NoobAI-XL-v1.1.safetensors", "animagine": "animagine-xl-4.0-opt.safetensors"}
 STYLES = {  # used with Z-Image (natural-language prompts)
     "pixar": "3D animated film still, stylized feature-animation character, soft subsurface skin, expressive big eyes, cinematic lighting, highly detailed",
     "anime": "high quality modern anime illustration, clean lineart, cel shading, detailed eyes, beautiful background",
@@ -50,6 +50,33 @@ def zimage_workflow(pos, neg, seed, w=896, h=1280, hq=False):
     }
 
 
+TURBO_SIGMAS = "1.0, 0.978453, 0.95418, 0.926626, 0.89508, 0.845148, 0.704534, 0.414568, 0"
+
+
+def qwen_workflow(pos, neg, seed, w=928, h=1664, fast=False):
+    """Qwen-Image 2.1 text-to-image (mirrors ComfyUI's official template, bf16 files for Apple GPUs)."""
+    wf = {
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "qwen_image_2.1_bf16.safetensors", "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen3vl_8b_bf16.safetensors", "type": "qwen_image", "device": "default"}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "qwen_image_2.1_vae_bf16.safetensors"}},
+        "4": {"class_type": "TextEncodeQwenImage21", "inputs": {"clip": ["2", 0], "prompt": pos, "negative_prompt": neg, "resolution": 1024}},
+        "5": {"class_type": "EmptyLatentImage", "inputs": {"width": w, "height": h, "batch_size": 1}},
+        "9": {"class_type": "VAEDecode", "inputs": {"samples": ["8", 0], "vae": ["3", 0]}},
+        "10": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": "stf"}},
+    }
+    if fast:
+        wf["6"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": ["1", 0], "lora_name": "qwen_image_2.1_turbo_lora_avg_rank_178_bf16.safetensors", "strength_model": 1.0}}
+        wf["11"] = {"class_type": "RandomNoise", "inputs": {"noise_seed": seed}}
+        wf["12"] = {"class_type": "CFGGuider", "inputs": {"model": ["6", 0], "positive": ["4", 0], "negative": ["4", 1], "cfg": 1.0}}
+        wf["13"] = {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}}
+        wf["14"] = {"class_type": "ManualSigmas", "inputs": {"sigmas": TURBO_SIGMAS}}
+        wf["8"] = {"class_type": "SamplerCustomAdvanced", "inputs": {"noise": ["11", 0], "guider": ["12", 0], "sampler": ["13", 0], "sigmas": ["14", 0], "latent_image": ["5", 0]}}
+    else:
+        wf["8"] = {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["4", 0], "negative": ["4", 1], "latent_image": ["5", 0],
+                                                         "seed": seed, "steps": 25, "cfg": 1.0, "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}}
+    return wf
+
+
 def call(path, data=None):
     req = urllib.request.Request(SERVER + path, data=json.dumps(data).encode() if data else None, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=60) as r:
@@ -76,7 +103,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("who", nargs="?", default="leads", help="character id, 'leads' (ishita+vihaan) or 'all'")
     ap.add_argument("-n", type=int, default=2, help="options per character per style")
-    ap.add_argument("-m", choices=list(MODELS), default="zimage")
+    ap.add_argument("-m", choices=list(MODELS), default="qwen")
     ap.add_argument("-s", "--style", default="all", help="zimage style: " + ", ".join(STYLES) + " or all")
     a = ap.parse_args()
     who = ["ishita", "vihaan"] if a.who == "leads" else list(cfg["characters"]) if a.who == "all" else [a.who]
@@ -87,12 +114,14 @@ def main():
         raise SystemExit(f"ComfyUI is not running at {SERVER}. Start it in another terminal: bash local-ai/start-mac.sh")
     for c in who:
         os.makedirs(os.path.join(HERE, "out", c), exist_ok=True)
-        for st in (styles if a.m.startswith("zimage") else [a.m]):
+        for st in (styles if a.m.startswith(("zimage", "qwen")) else [a.m]):
             for i in range(a.n):
                 seed = random.randint(1, 2**31)
                 dest = os.path.join(HERE, "out", c, f"{c}-{st}-{seed}.png")
                 t = time.time()
-                if a.m.startswith("zimage"):
+                if a.m.startswith("qwen"):
+                    wf = qwen_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Clearly Indian features and natural Indian skin tone, wholesome, vertical 9:16 frame, no text or watermark.", cfg["negative"], seed, fast=a.m == "qwen-fast")
+                elif a.m.startswith("zimage"):
                     wf = zimage_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", cfg["negative"], seed, hq=a.m == "zimage-hq")
                 else:
                     wf = workflow(MODELS[a.m], f"{cfg['characters'][c]}, {cfg['quality']}", cfg["negative"], seed)
