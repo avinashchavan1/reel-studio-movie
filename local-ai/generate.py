@@ -77,7 +77,7 @@ def qwen_workflow(pos, neg, seed, w=928, h=1664, fast=False):
     return wf
 
 
-def refine_workflow(image_name, pos, neg, seed, denoise=0.4, steps=50):
+def refine_workflow(image_name, pos, neg, seed, denoise=0.4, steps=20):  # ComfyUI runs exactly `steps` over the top `denoise` share of the schedule
     """Full Z-Image img2img pass over a chosen draft: keeps the face/composition, adds full-model detail."""
     return {
         "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "z_image_bf16.safetensors", "weight_dtype": "default"}},
