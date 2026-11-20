@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Generate character design options with the local ComfyUI server (start it first: bash local-ai/start-mac.sh).
 
-  python3 local-ai/generate.py                     # Ishita + Vihaan, 4 options each, both models
-  python3 local-ai/generate.py ishita -n 8         # 8 options of one character
-  python3 local-ai/generate.py all -m animagine    # whole cast, one model
+  python3 local-ai/generate.py                       # Ishita + Vihaan, Z-Image, 4 styles x 2 options
+  python3 local-ai/generate.py ishita -s pixar -n 8  # 8 Pixar-style options of one character
+  python3 local-ai/generate.py all -m noobai         # whole cast with the anime SDXL model
 
 Images land in local-ai/out/<character>/. Uses only the Python standard library.
 """
@@ -11,7 +11,13 @@ import argparse, json, os, random, time, urllib.request, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERVER = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
-MODELS = {"animagine": "animagine-xl-4.0-opt.safetensors", "illustrious": "Illustrious-XL-v0.1.safetensors"}
+MODELS = {"zimage": None, "noobai": "NoobAI-XL-v1.1.safetensors", "animagine": "animagine-xl-4.0-opt.safetensors"}
+STYLES = {  # used with Z-Image (natural-language prompts)
+    "pixar": "3D animated film still, stylized feature-animation character, soft subsurface skin, expressive big eyes, cinematic lighting, highly detailed",
+    "anime": "high quality modern anime illustration, clean lineart, cel shading, detailed eyes, beautiful background",
+    "ghibli": "hand-painted 2D animation film still, warm watercolor backgrounds, gentle soft colors, whimsical storybook feel",
+    "semireal": "semi-realistic digital painting, Indian webtoon style, soft painterly shading, detailed face, natural proportions",
+}
 
 
 def workflow(ckpt, pos, neg, seed, w=832, h=1216, steps=28, cfg=5.0):
@@ -24,6 +30,22 @@ def workflow(ckpt, pos, neg, seed, w=832, h=1216, steps=28, cfg=5.0):
                                                     "seed": seed, "steps": steps, "cfg": cfg, "sampler_name": "euler_ancestral", "scheduler": "normal", "denoise": 1.0}},
         "6": {"class_type": "VAEDecode", "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
         "7": {"class_type": "SaveImage", "inputs": {"images": ["6", 0], "filename_prefix": "stf"}},
+    }
+
+
+def zimage_workflow(pos, neg, seed, w=896, h=1280, steps=8):
+    return {
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "z_image_turbo_bf16.safetensors", "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_3_4b.safetensors", "type": "lumina2", "device": "default"}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "z_image_ae.safetensors"}},
+        "4": {"class_type": "ModelSamplingAuraFlow", "inputs": {"model": ["1", 0], "shift": 3.0}},
+        "5": {"class_type": "CLIPTextEncode", "inputs": {"text": pos, "clip": ["2", 0]}},
+        "6": {"class_type": "ConditioningZeroOut", "inputs": {"conditioning": ["5", 0]}},
+        "7": {"class_type": "EmptySD3LatentImage", "inputs": {"width": w, "height": h, "batch_size": 1}},
+        "8": {"class_type": "KSampler", "inputs": {"model": ["4", 0], "positive": ["5", 0], "negative": ["6", 0], "latent_image": ["7", 0],
+                                                    "seed": seed, "steps": steps, "cfg": 1.0, "sampler_name": "res_multistep", "scheduler": "simple", "denoise": 1.0}},
+        "9": {"class_type": "VAEDecode", "inputs": {"samples": ["8", 0], "vae": ["3", 0]}},
+        "10": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": "stf"}},
     }
 
 
@@ -52,23 +74,28 @@ def main():
     cfg = json.load(open(os.path.join(HERE, "characters.json")))
     ap = argparse.ArgumentParser()
     ap.add_argument("who", nargs="?", default="leads", help="character id, 'leads' (ishita+vihaan) or 'all'")
-    ap.add_argument("-n", type=int, default=4, help="options per character per model")
-    ap.add_argument("-m", choices=[*MODELS, "both"], default="both")
+    ap.add_argument("-n", type=int, default=2, help="options per character per style")
+    ap.add_argument("-m", choices=list(MODELS), default="zimage")
+    ap.add_argument("-s", "--style", default="all", help="zimage style: " + ", ".join(STYLES) + " or all")
     a = ap.parse_args()
     who = ["ishita", "vihaan"] if a.who == "leads" else list(cfg["characters"]) if a.who == "all" else [a.who]
-    models = list(MODELS) if a.m == "both" else [a.m]
+    styles = list(STYLES) if a.style == "all" else a.style.split(",")
     try:
         call("/system_stats")
     except Exception:
         raise SystemExit(f"ComfyUI is not running at {SERVER}. Start it in another terminal: bash local-ai/start-mac.sh")
     for c in who:
         os.makedirs(os.path.join(HERE, "out", c), exist_ok=True)
-        for m in models:
+        for st in (styles if a.m == "zimage" else [a.m]):
             for i in range(a.n):
                 seed = random.randint(1, 2**31)
-                dest = os.path.join(HERE, "out", c, f"{c}-{m}-{seed}.png")
+                dest = os.path.join(HERE, "out", c, f"{c}-{st}-{seed}.png")
                 t = time.time()
-                run(workflow(MODELS[m], f"{cfg['characters'][c]}, {cfg['quality']}", cfg["negative"], seed), dest)
+                if a.m == "zimage":
+                    wf = zimage_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", "", seed)
+                else:
+                    wf = workflow(MODELS[a.m], f"{cfg['characters'][c]}, {cfg['quality']}", cfg["negative"], seed)
+                run(wf, dest)
                 print(f"{os.path.relpath(dest, HERE)}  ({time.time() - t:.0f}s)", flush=True)
 
 
