@@ -1,0 +1,21 @@
+{
+  "episode": "ep01",
+  "title": "Two Strangers",
+  "cast": {
+    "ISHITA": "Ishita, a 19 year old young Indian woman, warm brown skin, big expressive dark brown eyes, long black hair in a single side braid with a gold hair tie, small red bindi, small gold earrings, pink cotton kurta with yellow trim, light pink dupatta",
+    "VIHAAN": "Vihaan, a 20 year old young Indian man, warm brown skin, dark brown eyes, short messy black hair, light stubble, blue plaid shirt open over a white t-shirt, white headphones around his neck, black backpack",
+    "ZOYA": "Zoya, a 19 year old young Indian woman, medium brown skin, shoulder length wavy black hair, round black glasses, yellow kurti, denim vest",
+    "DAD": "Dad, a 50 year old Indian father, brown skin, thick grey moustache, short greying hair, white half-sleeve shirt, beige trousers",
+    "MOM": "Mom, a 45 year old Indian mother, warm brown skin, black hair in a low bun with white jasmine flowers, red bindi, green cotton saree with a gold border"
+  },
+  "shots": [
+    {"id": "s01-hook", "prompt": "vertical split-screen composition: on the left ISHITA in a girls hostel corridor, on the right VIHAAN in a boys hostel corridor, both looking down at their glowing phones at night, a soft glowing wifi symbol floating in the middle between them, cinematic mysterious blue and pink lighting"},
+    {"id": "s02-hometown", "prompt": "ISHITA standing on the terrace of a small house in a quiet Karnataka town at sunrise, looking at the sky with a dreamy hopeful smile, red tiled roofs, coconut trees and a temple tower in the distance, warm golden light"},
+    {"id": "s03-home", "prompt": "inside a modest Indian living room: DAD standing and holding up an engineering college admission letter with a firm serious face, MOM beside him looking proud but worried, ISHITA sitting on the sofa with teary eyes looking down, warm evening lamp light, emotional"},
+    {"id": "s04-train", "prompt": "ISHITA sitting by the window of an Indian sleeper train with a suitcase beside her, looking out at passing green fields with a bittersweet expression, wind moving her braid, soft afternoon light"},
+    {"id": "s05-bangalore", "prompt": "wide shot: ISHITA holding a suitcase on a busy Bangalore street, looking up in awe at tall glass buildings, a metro bridge, auto rickshaws and traffic around her, she looks small and overwhelmed, bright day"},
+    {"id": "s06-hostel", "prompt": "a cozy girls hostel room with bunk beds and fairy lights: ZOYA grinning playfully with an arm around ISHITA, who laughs shyly, both sitting on the lower bunk, warm evening light, fun friendship"},
+    {"id": "s07-campus", "prompt": "wide shot of a big engineering college campus with two separate academic blocks: ISHITA walking with books near the left block, VIHAAN walking with friends near the right block, they do not notice each other, many students around, bright morning"},
+    {"id": "s08-cliffhanger", "prompt": "close-up of a hand holding a smartphone in a dark hostel room at night, the phone screen glowing brightly with a wifi signal icon, dramatic light on the face of ISHITA in the background looking surprised, suspenseful"}
+  ]
+}

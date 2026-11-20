@@ -123,6 +123,8 @@ def main():
     ap.add_argument("-n", type=int, default=2, help="options per character per style")
     ap.add_argument("-m", choices=list(MODELS), default="zimage-hq")
     ap.add_argument("--size", default="832x1472", help="WxH; 832x1472 fits a 32 GB Mac comfortably, 1088x1920 is full reel size (needs lots of free RAM)")
+    ap.add_argument("--shots", metavar="JSON", help="render an episode shot list, e.g. shots/ep01.json")
+    ap.add_argument("--only", default="", help="with --shots: shot numbers, e.g. 1-4 or 2,5")
     ap.add_argument("--refine", metavar="PNG", help="refine a chosen draft with the full model (keeps the face); use with one character id")
     ap.add_argument("--steps", type=int, default=20, help="refine steps (14-20 fits one 30-min run on an M1 Pro)")
     ap.add_argument("--denoise", type=float, default=0.4, help="refine strength: 0.3 subtle .. 0.5 stronger")
@@ -135,6 +137,26 @@ def main():
         call("/system_stats")
     except Exception:
         raise SystemExit(f"ComfyUI is not running at {SERVER}. Start it in another terminal: bash local-ai/start-mac.sh")
+    if a.shots:
+        sp = json.load(open(a.shots if os.path.isabs(a.shots) else os.path.join(HERE, a.shots)))
+        pick = set()
+        for part in filter(None, a.only.split(",")):
+            lo, _, hi = part.partition("-"); pick.update(range(int(lo), int(hi or lo) + 1))
+        outdir = os.path.join(HERE, "shots-out", sp["episode"]); os.makedirs(outdir, exist_ok=True)
+        st = a.style if a.style != "all" else "anime"
+        for i, shot in enumerate(sp["shots"], 1):
+            if pick and i not in pick:
+                continue
+            prompt = shot["prompt"]
+            for tag, desc in sp["cast"].items():
+                prompt = prompt.replace(tag, f"{desc} ({tag.title()})")
+            for k in range(a.n if a.n != 2 else 1):
+                seed = random.randint(1, 2**31)
+                dest = os.path.join(outdir, f"{shot['id']}-{seed}.png")
+                t = time.time()
+                run(zimage_workflow(f"{STYLES[st]}. {prompt}. Indian setting, vertical 9:16 frame, no text, no watermark", cfg["negative"], seed, w=W, h=H, hq=a.m == "zimage-hq"), dest)
+                print(f"{os.path.relpath(dest, HERE)}  ({time.time() - t:.0f}s)", flush=True)
+        return
     if a.refine:
         import shutil
         c, st = who[0], (styles[0] if a.style != "all" else "anime")
