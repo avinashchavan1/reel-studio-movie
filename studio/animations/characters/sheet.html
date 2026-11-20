@@ -5,7 +5,7 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 window.draw = async () => {
   for (const [f, u, w] of [['Title', '../style-sampler/src/assets/title.woff2', 600]]) { try { document.fonts.add(await new FontFace(f, `url(${u})`, { weight: String(w) }).load()); } catch (e) {} }
   ctx.fillStyle = '#faf6ee'; ctx.fillRect(0, 0, 2400, 1500);
-  ctx.fillStyle = '#2a2230'; ctx.font = '600 54px Title'; ctx.fillText('Strangers to Forever · character sheet v2', 50, 80);
+  ctx.fillStyle = '#2a2230'; ctx.font = '600 54px Title'; ctx.fillText('Strangers to Forever · character sheet v3 · realistic', 50, 80);
   // full bodies
   hero3(ctx, 300, 1400, 1.25, CAST3.ishita, { t: .4, emo: 'happy', look: .3 });
   hero3(ctx, 760, 1400, 1.25, CAST3.vihaan, { t: 1.1, emo: 'happy', look: -.3 });
@@ -16,7 +16,7 @@ window.draw = async () => {
     for (const [r, L, key] of [[0, CAST3.ishita, 'ishita'], [1, CAST3.vihaan, 'vihaan']]) {
       const x = 1150 + i * 205, y = 180 + r * 640;
       ctx.save(); ctx.beginPath(); ctx.roundRect(x - 95, y, 190, 270, 18); ctx.fillStyle = '#f0e9dc'; ctx.fill(); ctx.clip();
-      hero3(ctx, x, y + 1290 * 1.0 * (L.H / 960) * 1.1 + 70, 1.1 * 1.4, L, { t: 1.9, emo: e === 'talking' ? 'neutral' : e, talk, look: 0, pose: 'idle' });
+      hero3(ctx, x, y + 150 + 2.2 * 846 * (L.H / 960), 2.2, L, { t: 1.9, emo: e === 'talking' ? 'neutral' : e, talk, look: 0, pose: 'idle' });
       ctx.restore(); ctx.fillStyle = '#6b6470'; ctx.font = '28px system-ui'; ctx.fillText(e, x - 50, y + 305);
     }
   });
