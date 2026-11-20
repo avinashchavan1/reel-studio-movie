@@ -5,7 +5,7 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 window.draw = async () => {
   for (const [f, u, w] of [['Title', '../style-sampler/src/assets/title.woff2', 600]]) { try { document.fonts.add(await new FontFace(f, `url(${u})`, { weight: String(w) }).load()); } catch (e) {} }
   ctx.fillStyle = '#faf6ee'; ctx.fillRect(0, 0, 2400, 1500);
-  ctx.fillStyle = '#2a2230'; ctx.font = '600 54px Title'; ctx.fillText('Strangers to Forever · character sheet v3 · realistic', 50, 80);
+  ctx.fillStyle = '#2a2230'; ctx.font = '600 54px Title'; ctx.fillText('Strangers to Forever · character sheet v4 · anime', 50, 80);
   // full bodies
   hero3(ctx, 300, 1400, 1.25, CAST3.ishita, { t: .4, emo: 'happy', look: .3 });
   hero3(ctx, 760, 1400, 1.25, CAST3.vihaan, { t: 1.1, emo: 'happy', look: -.3 });
