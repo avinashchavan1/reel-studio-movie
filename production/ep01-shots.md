@@ -17,14 +17,14 @@ Save as `ep01-shot1.mp4` … `ep01-shot8.mp4` and `ep01-vo1.mp3` … (or one ful
 - **Narrator:** "This is Ishita. A simple girl from a small town called Dharwad."
 
 ### Shot 3: The decision
-- **Image:** Inside a modest living room, Appa holding an engineering admission letter, Amma beside him smiling proudly, Ishita sitting on the sofa looking down, upset.
-- **Motion:** Appa speaks firmly and taps the letter, Amma nods, Ishita's eyes fill with tears and she looks away, slow zoom on Ishita's face.
-- **Appa:** "Engineering. Final."
-- **Ishita (soft):** "But Appa… I never wanted engineering."
+- **Image:** Inside a modest living room, Dad holding an engineering admission letter, Mom beside him smiling proudly, Ishita sitting on the sofa looking down, upset.
+- **Motion:** Dad speaks firmly and taps the letter, Mom nods, Ishita's eyes fill with tears and she looks away, slow zoom on Ishita's face.
+- **Dad:** "Engineering. Final."
+- **Ishita (soft):** "But Dad… I never wanted engineering."
 
 ### Shot 4: Leaving home
-- **Image:** Busy Indian railway platform (Dharwad station), Ishita with a suitcase hugging Amma, Appa holding her bag, train waiting.
-- **Motion:** Ishita hugs Amma tightly, Appa pats her head, she boards the train and waves from the door as it starts moving.
+- **Image:** Busy Indian railway platform (Dharwad station), Ishita with a suitcase hugging Mom, Dad holding her bag, train waiting.
+- **Motion:** Ishita hugs Mom tightly, Dad pats her head, she boards the train and waves from the door as it starts moving.
 - **Narrator:** "With one suitcase and a heavy heart… she left for the big city, Bangalore."
 
 ### Shot 5: Big city

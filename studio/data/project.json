@@ -87,8 +87,8 @@
       "voice": null
     },
     {
-      "id": "appa",
-      "name": "Appa",
+      "id": "dad",
+      "name": "Dad",
       "role": "parent",
       "description": "Strict but loving father. Moustache, orange shirt.",
       "color": "#ffb347",
@@ -100,8 +100,8 @@
       }
     },
     {
-      "id": "amma",
-      "name": "Amma",
+      "id": "mom",
+      "name": "Mom",
       "role": "parent",
       "description": "Caring mother, green saree, jasmine in her hair.",
       "color": "#4fc08d",
@@ -215,7 +215,7 @@
         "production",
         "voice"
       ],
-      "body": "- Narrator: Yatin (Sacred & Divine Love Storyteller). Warm, soothing male storyteller.\n- Ishita: Tarini (Calm and Measured).\n- Vihaan: Amit Gupta (Lover Boy Romantic).\n- Zoya: Monika Sogam (Friendly and Reassuring).\n- Appa: Shardul K (deep, authoritative).\n- Amma, Tanvi: cast when they first speak."
+      "body": "- Narrator: Yatin (Sacred & Divine Love Storyteller). Warm, soothing male storyteller.\n- Ishita: Tarini (Calm and Measured).\n- Vihaan: Amit Gupta (Lover Boy Romantic).\n- Zoya: Monika Sogam (Friendly and Reassuring).\n- Dad: Shardul K (deep, authoritative).\n- Mom, Tanvi: cast when they first speak."
     },
     {
       "id": "kb-privacy",
@@ -561,8 +561,8 @@
           "location": "home",
           "characters": [
             "ishita",
-            "amma",
-            "appa"
+            "mom",
+            "dad"
           ],
           "mood": "emotional",
           "minDuration": 3,
@@ -570,7 +570,7 @@
           "lines": [
             {
               "id": "ln_cyr9l4t",
-              "speaker": "appa",
+              "speaker": "dad",
               "text": "[firmly] Engineering. Final!",
               "emotion": "firm",
               "subtitle": "Engineering. Final!",
@@ -635,9 +635,9 @@
             {
               "id": "ln_snktbcr",
               "speaker": "ishita",
-              "text": "[sad, softly] पर Appa... मुझे engineering नहीं करनी।",
+              "text": "[sad, softly] पर Dad... मुझे engineering नहीं करनी।",
               "emotion": "sad",
-              "subtitle": "Par Appa... mujhe engineering nahi karni.",
+              "subtitle": "Par Dad... mujhe engineering nahi karni.",
               "audio": {
                 "url": "/media/audio/ep_01-ln_snktbcr-1795113043553.mp3",
                 "duration": 3.004,
@@ -732,7 +732,7 @@
                   0.15,
                   0.05
                 ],
-                "text": "[sad, softly] पर Appa... मुझे engineering नहीं करनी।",
+                "text": "[sad, softly] पर Dad... मुझे engineering नहीं करनी।",
                 "at": "2026-11-19T18:30:45.460Z"
               }
             }
@@ -1601,12 +1601,12 @@
       },
       {
         "a": "ishita",
-        "b": "appa",
+        "b": "dad",
         "label": "father"
       },
       {
         "a": "ishita",
-        "b": "amma",
+        "b": "mom",
         "label": "mother"
       }
     ]

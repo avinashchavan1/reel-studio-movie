@@ -12,7 +12,7 @@ CAST = {  # role -> (voice_id, settings)   final cast, Hinglish, eleven_v3
     "ishita":   ("kiaJRdXJzloFWi6AtFBf", V3),  # Tarini: calm, measured
     "vihaan":   ("GhcgqZ83VDU5cWonBdAL", V3),  # Amit Gupta: lover-boy romantic
     "zoya":     ("2bNrEsM0omyhLiEyOwqY", V3),  # Monika Sogam: friendly
-    "appa":     ("6EphsklDopDQ6eRkwNHT", V3),  # Shardul K: deep, authoritative
+    "dad":     ("6EphsklDopDQ6eRkwNHT", V3),  # Shardul K: deep, authoritative
 }
 HOMETOWN = None  # set once chosen; lines containing {HOMETOWN} are skipped until then
 
@@ -20,8 +20,8 @@ LINES = {
     "ep01": [
         ("narrator", "[softly] दो अजनबी... एक ही शहर... एक ही college... [pause] और उन्हें बिल्कुल पता नहीं था... [warmly] कि वो एक-दूसरे के लिए ही बने थे।"),
         ("narrator", "ये है Ishita. {HOMETOWN} की एक सीधी-सादी लड़की... जिसके सपने छोटे थे, पर बहुत प्यारे।"),
-        ("appa",     "[firmly] Engineering. Final. ये तुम्हारे future के लिए है, बेटा।"),
-        ("ishita",   "[sad, softly] लेकिन Appa... मुझे engineering कभी करनी ही नहीं थी।"),
+        ("dad",     "[firmly] Engineering. Final. ये तुम्हारे future के लिए है, बेटा।"),
+        ("ishita",   "[sad, softly] लेकिन Dad... मुझे engineering कभी करनी ही नहीं थी।"),
         ("narrator", "[gently] एक suitcase... और भारी दिल के साथ... वो निकल पड़ी Bangalore की तरफ़।"),
         ("narrator", "[amazed] सब कुछ इतना बड़ा... इतना तेज़... इतना नया था।"),
         ("zoya",     "[cheerful] Relax yaar, roomie! बस engineering ही तो है... worst क्या हो सकता है?"),

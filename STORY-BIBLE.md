@@ -39,9 +39,9 @@ Shared style: chibi proportions (big round head about 45% of height), dot-oval e
 - **Look:** two short pigtails, mint top `#9BE3C4`.
 - **Signature:** a phone showing 1% battery and a "recharge" pack.
 
-### APPA & AMMA (Ishita's parents)
-- **Appa:** moustache, orange shirt, strict but loving, arms folded.
-- **Amma:** bun with a flower, green saree, worried-proud face.
+### DAD & MOM (Ishita's parents)
+- **Dad:** moustache, orange shirt, strict but loving, arms folded.
+- **Mom:** bun with a flower, green saree, worried-proud face.
 
 ---
 
@@ -69,8 +69,8 @@ Color coding: **pink = Ishita's world, blue = Vihaan's world**. When they come t
 | **Ishita** | Tarini, Calm and Measured | soft, gentle young woman |
 | **Vihaan** | Amit Gupta, Lover Boy Romantic | smooth, charming |
 | **Zoya** | Monika Sogam, Friendly and Reassuring | bright bestie |
-| **Appa** | Shardul K, deep and authoritative | commanding father |
-| **Amma / Tanvi** | to be cast when they first speak | |
+| **Dad** | Shardul K, deep and authoritative | commanding father |
+| **Mom / Tanvi** | to be cast when they first speak | |
 
 Language: **Hinglish** (Hindi written in Devanagari, with English words like college and engineering in English).
 Voice script: `production/voices/make_voices.py`.

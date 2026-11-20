@@ -13,13 +13,13 @@ F, S = "f87f057c2250691953ac2e6227859706764bd08c88a055a18c74261957885a51", "7398
 ROLES = {
     "narrator": ("दो अजनबी... एक ही शहर, एक ही college... और उन्हें पता ही नहीं था कि वो एक-दूसरे के लिए बने हैं।",
                  [("A-Kanika-warm", S, "C2S5J6WvmHnrQWjUu6Rg"), ("B-Monika-calm", F, "1qEiC6qsybMkmnNdVMbK"), ("C-Anjali-cheerful", F, "gHu9GtaHOXcSqFTK06ux")]),
-    "ishita":   ("लेकिन Appa... मुझे engineering कभी करनी ही नहीं थी।",
+    "ishita":   ("लेकिन Dad... मुझे engineering कभी करनी ही नहीं थी।",
                  [("A-Simran-young", S, "9w21nMuk8CWXIME31V1S"), ("B-Tarini-calm", S, "kiaJRdXJzloFWi6AtFBf"), ("C-Sia-friendly", S, "KYiVPerWcenyBTIvWbfY")]),
     "vihaan":   ("Hey... लगता है मैं तुम्हारे hotspot से connected हूँ। चलेगा ना?",
                  [("A-Viraj-expressive", S, "3AMU7jXQuQa3oRvRqUmb"), ("B-Viraj-lively", F, "iWNf11sz1GrUE4ppxTOL"), ("C-Niraj-romantic", F, "zgqefOY5FPQ3bB7OZTVR")]),
     "zoya":     ("Relax yaar, roomie! बस engineering ही तो है... worst क्या हो सकता है?",
                  [("A-Nikita-excited", S, "7w5JDCUNbeKrn4ySFgfu"), ("B-Monika-friendly", S, "2bNrEsM0omyhLiEyOwqY"), ("C-Simran-bestie", None, "1ea3IFhmSWgw8sJkSvfJ")]),
-    "appa":     ("Engineering. Final. ये तुम्हारे future के लिए है, बेटा।",
+    "dad":     ("Engineering. Final. ये तुम्हारे future के लिए है, बेटा।",
                  [("A-Raju-warm", F, "zT03pEAEi0VHKciJODfn"), ("B-Raghav-calm", S, "4BoDaQ6aygOP6fpsUmJe"), ("C-Sanjay-mature", None, "PboFIQ6kckfADmG3UQYF")]),
 }
 

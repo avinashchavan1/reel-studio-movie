@@ -36,8 +36,8 @@ export function buildStory(stage, B) {
     { name: 'Ishita', note: 'Lead. Pink kurta, salwar, flowing dupatta, long braid with a pink clip, bindi.', make: () => { const c = cast.ishita(); c.pose({ t: 0.5, smile: 1 }); return c.root; } },
     { name: 'Vihaan', note: 'Lead. Blue checked shirt over a white tee, jeans, backpack, earphones, quiff.', make: () => { const c = cast.vihaan(); c.pose({ t: 0.5 }); return c.root; } },
     { name: 'Zoya', note: "Ishita's roommate & best friend. Lavender kurti, round glasses, high bun.", make: () => { const c = cast.zoya(); c.pose({ t: 0.5, wave: 1, waveT: 0.3 }); return c.root; } },
-    { name: 'Appa', note: 'Father. Cream shirt, specs, moustache, greying sides. Strict but loving.', make: () => { const c = cast.appa(); c.pose({ t: 0.5 }); return c.root; } },
-    { name: 'Amma', note: 'Mother. Green saree with gold border and pallu, jasmine in a low bun.', make: () => { const c = cast.amma(); c.pose({ t: 0.5 }); return c.root; } },
+    { name: 'Dad', note: 'Father. Cream shirt, specs, moustache, greying sides. Strict but loving.', make: () => { const c = cast.appa(); c.pose({ t: 0.5 }); return c.root; } },
+    { name: 'Mom', note: 'Mother. Green saree with gold border and pallu, jasmine in a low bun.', make: () => { const c = cast.amma(); c.pose({ t: 0.5 }); return c.root; } },
     { name: "Ishita's phone", note: 'Key object. Her first smartphone; the hotspot icon glows pink when it turns on.', make: () => cast.phone(), float: true, zoom: 0.7 },
   ];
   return { sets, shots, overlay: () => {}, design, designTitle: 'Strangers to Forever · Ep 1 cast', finish: { grain: 0.06, vignette: 0.35, fadeIn: 0.5, fadeOut: 0.8 } };

@@ -46,7 +46,7 @@ const DOC_DEFAULTS = {
   calendar: [],
   world: { relations: [
     { a: 'ishita', b: 'vihaan', label: 'strangers → lifetime partners' }, { a: 'ishita', b: 'zoya', label: 'roommate & best friend' },
-    { a: 'ishita', b: 'tanvi', label: 'classmate (borrowed the hotspot)' }, { a: 'ishita', b: 'appa', label: 'father' }, { a: 'ishita', b: 'amma', label: 'mother' },
+    { a: 'ishita', b: 'tanvi', label: 'classmate (borrowed the hotspot)' }, { a: 'ishita', b: 'dad', label: 'father' }, { a: 'ishita', b: 'mom', label: 'mother' },
   ] },
   profiles: {
     instagram: { handle: '', displayName: 'Strangers to Forever', bio: 'Our love story, one reel at a time 💕\nFrom strangers in engineering college to forever\n👇 Start from Part 1', link: '', checklist: {} },

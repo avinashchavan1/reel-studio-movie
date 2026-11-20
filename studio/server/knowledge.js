@@ -47,8 +47,8 @@ Example: "He connected to my hotspot before he connected to my heart 📶❤️ 
 - Ishita: Tarini (Calm and Measured).
 - Vihaan: Amit Gupta (Lover Boy Romantic).
 - Zoya: Monika Sogam (Friendly and Reassuring).
-- Appa: Shardul K (deep, authoritative).
-- Amma, Tanvi: cast when they first speak.` },
+- Dad: Shardul K (deep, authoritative).
+- Mom, Tanvi: cast when they first speak.` },
   { id: 'kb-privacy', title: 'Privacy rules', tags: ['privacy'], body: `- Never use real names of people, the real hometown, or the real college. Real ↔ series names live only in the private name map (Settings → Privacy), never committed to git.
 - Story dumps are auto-anonymized when saved.
 - Every episode is leak-scanned before publishing; publishing is blocked if a real name is found.

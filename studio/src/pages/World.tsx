@@ -6,7 +6,7 @@ import { CharacterPreview } from '../components/CharacterPreview';
 
 const DELIVERY: Record<string, string> = {
   narrator: 'Warm, soothing storyteller', ishita: 'Soft, gentle, a little shy', vihaan: 'Smooth, charming, playful',
-  zoya: 'Bright, loud, loyal', appa: 'Deep, firm, loving underneath', amma: 'Caring, a little anxious', tanvi: 'Chatty, quick',
+  zoya: 'Bright, loud, loyal', dad: 'Deep, firm, loving underneath', mom: 'Caring, a little anxious', tanvi: 'Chatty, quick',
 };
 const SCENES: Record<string, string> = { town: 'Small-town street', room: 'Home interior', hostel: 'Hostel room', train: 'Train journey', station: 'Railway platform', city: 'Big city', college: 'College campus', night: 'Night sky' };
 

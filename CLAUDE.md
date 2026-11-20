@@ -19,7 +19,7 @@ Claude is the writer, voice director, animator and editor; the user publishes fr
 ## Privacy (the repo is PUBLIC)
 - Real names, the real hometown and the real college never go into git, code, renders, captions or the hub.
 - Real ↔ series names live only in `PRIVATE-name-map.md` and `studio/data/private/` (both git-ignored).
-- Series names: Ishita (lead), Vihaan (lead), Zoya (roommate), Tanvi (classmate), Appa, Amma. Hometown: Dharwad. City: Bangalore. College: Silicon Valley Institute of Technology.
+- Series names: Ishita (lead), Vihaan (lead), Zoya (roommate), Tanvi (classmate), Dad, Mom. Hometown: Dharwad. City: Bangalore. College: Silicon Valley Institute of Technology.
 
 ## Studio model (matches Untold Granth Studio)
 - The studio app is a lean review-and-publish tool: Dashboard ("Today in the studio"), Reels (table + per-reel Publish / Story check),

@@ -26,8 +26,8 @@ const CAST = {
   kabir: { name: 'Kabir', style: 'spiky', hair: '#241817', skin: '#dfa77f', shirt: '#6ea8fe', hood: true, pants: '#3d4b7a', earphones: true, brows: true, bag: '#4a5a8a' },
   zoya:  { name: 'Zoya',  style: 'bun',   hair: '#6b3e2e', skin: '#f6cfae', shirt: '#b69cff', pants: '#6f8fd8', glasses: true },
   pihu:  { name: 'Pihu',  style: 'pigtails', hair: '#4a2c22', skin: '#efbf98', shirt: '#9be3c4', skirt: '#ffb3c6' },
-  amma:  { name: 'Amma',  style: 'bun', hair: '#241a1a', skin: '#e3ab84', shirt: '#4fc08d', saree: '#4fc08d', flower: true },
-  appa:  { name: 'Appa',  style: 'short', hair: '#241a1a', skin: '#d39b73', shirt: '#ffb347', pants: '#6b5b4b', mustache: true, brows: true },
+  amma:  { name: 'Mom',   style: 'bun', hair: '#241a1a', skin: '#e3ab84', shirt: '#4fc08d', saree: '#4fc08d', flower: true },
+  appa:  { name: 'Dad',   style: 'short', hair: '#241a1a', skin: '#d39b73', shirt: '#ffb347', pants: '#6b5b4b', mustache: true, brows: true },
 };
 
 // Chibi character. (x, y) = point between the feet. o: {t, expr, wave, walking, phase, look}

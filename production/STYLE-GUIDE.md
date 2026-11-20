@@ -6,7 +6,7 @@
 > - Approved leads: **Ishita option 2** (`out/ishita/ishita-anime-95592134.png`) and **Vihaan option 2**
 >   (`out/vihaan/vihaan-anime-1723354399.png`). Sheets: `output/designs/`.
 > - Supporting cast (anime v1): Zoya `out/zoya/zoya-anime-204161517.png`, Tanvi `out/tanvi/tanvi-anime-1576944704.png`,
->   Appa `out/appa/appa-anime-1273477893.png`, Amma `out/amma/amma-anime-1071612542.png`. Full sheet: `output/designs/cast-anime-v1.jpg`.
+>   Dad `out/appa/appa-anime-1273477893.png`, Mom `out/amma/amma-anime-1071612542.png`. Full sheet: `output/designs/cast-anime-v1.jpg`.
 > - Everyone reads as their real age (leads 19–20); prompts live in `local-ai/characters.json`.
 > - The 32 GB Mac runs Turbo at ~5 min/image; the full model needs Chrome closed (or an overnight Terminal run).
 
@@ -49,9 +49,9 @@ cheerful wide grin. Outfit: lavender kurti, blue jeans, a tote bag, always holdi
 
 **TANVI (classmate, 18)**: petite Indian girl, two short braids, mint-green kurti, white leggings, holding a phone.
 
-**APPA (father, 50)**: Indian man, neat moustache, greying side hair, spectacles, cream half-sleeve shirt, strict but loving.
+**DAD (father, 50)**: Indian man, neat moustache, greying side hair, spectacles, cream half-sleeve shirt, strict but loving.
 
-**AMMA (mother, 45)**: Indian woman, hair in a bun with jasmine flowers, green cotton saree with gold border, red bindi, warm worried smile.
+**MOM (mother, 45)**: Indian woman, hair in a bun with jasmine flowers, green cotton saree with gold border, red bindi, warm worried smile.
 
 ## Recurring sets
 - **Dharwad**: small Indian town lane, tiled-roof houses, a kirana shop, electric poles and wires, mango tree, autos and scooters.

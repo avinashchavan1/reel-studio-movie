@@ -13,8 +13,8 @@ const characters = [
   { id: 'vihaan', name: 'Vihaan', role: 'lead', description: 'Calm, cheeky, confident. Sky-blue shirt, messy hair, earphones round his neck.', color: '#6ea8fe', look: 'kabir', voice: { id: 'GhcgqZ83VDU5cWonBdAL', name: 'Amit Gupta – Lover Boy Romantic', model: 'eleven_v3' } },
   { id: 'zoya', name: 'Zoya', role: 'friend', description: "Ishita's roommate and best friend. Loud, loyal, round glasses, high bun.", color: '#b69cff', look: 'zoya', voice: { id: '2bNrEsM0omyhLiEyOwqY', name: 'Monika Sogam – Friendly', model: 'eleven_v3' } },
   { id: 'tanvi', name: 'Tanvi', role: 'classmate', description: 'Chatty classmate, always on 1% battery. Borrowed the hotspot.', color: '#9be3c4', look: 'pihu', voice: null },
-  { id: 'appa', name: 'Appa', role: 'parent', description: 'Strict but loving father. Moustache, orange shirt.', color: '#ffb347', look: 'appa', voice: { id: '6EphsklDopDQ6eRkwNHT', name: 'Shardul K – Deep, Authoritative', model: 'eleven_v3' } },
-  { id: 'amma', name: 'Amma', role: 'parent', description: 'Caring mother, green saree, jasmine in her hair.', color: '#4fc08d', look: 'amma', voice: null },
+  { id: 'dad', name: 'Dad', role: 'parent', description: 'Strict but loving father. Moustache, orange shirt.', color: '#ffb347', look: 'appa', voice: { id: '6EphsklDopDQ6eRkwNHT', name: 'Shardul K – Deep, Authoritative', model: 'eleven_v3' } },
+  { id: 'mom', name: 'Mom', role: 'parent', description: 'Caring mother, green saree, jasmine in her hair.', color: '#4fc08d', look: 'amma', voice: null },
 ];
 const places = [
   { id: 'hometown', name: 'Hometown (to choose)', scene: 'town', description: 'Small Karnataka town: tiled roofs, mango tree, kirana shop.' },
@@ -33,8 +33,8 @@ const shots = [
     lines: [L('narrator', '[softly] दो अजनबी... एक ही शहर... एक ही college... [pause] और उन्हें बिल्कुल पता नहीं था... [warmly] कि वो एक-दूसरे के लिए ही बने थे।', 'neutral', '01-narrator.mp3')] }),
   S('scene', { location: 'hometown', characters: ['ishita'], mood: 'homely', params: { showLocation: true },
     lines: [L('narrator', '[warmly] ये है Ishita. एक छोटे से शहर की सीधी-सादी लड़की... जिसके सपने छोटे थे, पर बहुत प्यारे।')] }),
-  S('scene', { location: 'home', characters: ['ishita', 'amma', 'appa'], mood: 'emotional',
-    lines: [L('appa', '[firmly] Engineering. Final. ये तुम्हारे future के लिए है, बेटा।', 'firm', '03-appa.mp3'), L('ishita', '[sad, softly] लेकिन Appa... मुझे engineering कभी करनी ही नहीं थी।', 'sad', '04-ishita.mp3')] }),
+  S('scene', { location: 'home', characters: ['ishita', 'mom', 'dad'], mood: 'emotional',
+    lines: [L('dad', '[firmly] Engineering. Final. ये तुम्हारे future के लिए है, बेटा।', 'firm', '03-appa.mp3'), L('ishita', '[sad, softly] लेकिन Dad... मुझे engineering कभी करनी ही नहीं थी।', 'sad', '04-ishita.mp3')] }),
   S('train', { location: 'train', characters: ['ishita'], mood: 'journey', lines: [L('narrator', '[gently] एक suitcase... और भारी दिल के साथ... वो निकल पड़ी Bangalore की तरफ़।', 'neutral', '05-narrator.mp3')] }),
   S('scene', { location: 'bangalore', characters: ['ishita'], mood: 'city', params: { showLocation: true }, lines: [L('narrator', '[amazed] सब कुछ इतना बड़ा... इतना तेज़... इतना नया था।', 'neutral', '06-narrator.mp3')] }),
   S('scene', { location: 'svit', characters: ['ishita', 'zoya'], mood: 'playful', lines: [L('zoya', '[cheerful] Relax yaar, roomie! बस engineering ही तो है... worst क्या हो सकता है?', 'happy', '07-zoya.mp3')] }),

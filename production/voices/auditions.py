@@ -13,13 +13,13 @@ F, S = "f87f057c2250691953ac2e6227859706764bd08c88a055a18c74261957885a51", "7398
 ROLES = {
     "narrator": ("Two strangers... same city, same college... and no idea they were made for each other.",
                  [("A-Zara-soft", None, "ADd2WEtjmwokqUr0Y5Ad"), ("B-Saavi-warm", S, "H8bdWZHK2OgZwTN7ponr"), ("C-Monika-deep", F, "2zRM7PkgwBPiau2jvVXc")]),
-    "tara":     ("But Appa... I never wanted engineering.",
+    "tara":     ("But Dad... I never wanted engineering.",
                  [("A-Tara-expressive", None, "P7vsEyTOpZ6YUTulin8m"), ("B-Naina-youthful", F, "6BZyx2XekeeXOkTVn8un"), ("C-Anika-sweet", S, "ecp3DWciuUyW7BYM7II1")]),
     "kabir":    ("Hey... I think I'm connected to your hotspot. Hope that's okay?",
                  [("A-Kartik-warm", None, "XPqjYvTqfyUQr09yCpCY"), ("B-Viraj-gentle", F, "1U02n4nD6AdIZ9CjF053"), ("C-Siddhu-friendly", S, "iLrek0aeAREetkK9NhwJ")]),
     "zoya":     ("Relax, roomie! It's just engineering. What's the worst that could happen?",
                  [("A-Simran-cheerful", None, "1ea3IFhmSWgw8sJkSvfJ"), ("B-Neha-relatable", S, "QTKSa2Iyv0yoxvXY2V8a"), ("C-Monika-natural", F, "EaBs7G1VibMrNAuz2Na7")]),
-    "appa":     ("Engineering. Final. This is for your future, beta.",
+    "dad":     ("Engineering. Final. This is for your future, beta.",
                  [("A-Sagar-formal", None, "Qc0h5B5Mqs8oaH4sFZ9X"), ("B-Ranbir-warm", F, "9PvnT6XRzlljoaDG6Knu"), ("C-Sanjay-mature", None, "PboFIQ6kckfADmG3UQYF")]),
 }
 
