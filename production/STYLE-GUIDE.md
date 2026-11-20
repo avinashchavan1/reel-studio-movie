@@ -5,7 +5,8 @@
 >   Drafts with Turbo (`run-mac.sh <char> -m zimage -s anime`), finals by `--refine` with the full model.
 > - Approved leads: **Ishita option 2** (`out/ishita/ishita-anime-95592134.png`) and **Vihaan option 2**
 >   (`out/vihaan/vihaan-anime-1723354399.png`). Sheets: `output/designs/`.
-> - Supporting cast: Zoya draft done (`out/zoya/zoya-anime-204161517.png`); Tanvi, Appa, Amma in progress.
+> - Supporting cast (anime v1): Zoya `out/zoya/zoya-anime-204161517.png`, Tanvi `out/tanvi/tanvi-anime-1576944704.png`,
+>   Appa `out/appa/appa-anime-1273477893.png`, Amma `out/amma/amma-anime-1071612542.png`. Full sheet: `output/designs/cast-anime-v1.jpg`.
 > - Everyone reads as their real age (leads 19–20); prompts live in `local-ai/characters.json`.
 > - The 32 GB Mac runs Turbo at ~5 min/image; the full model needs Chrome closed (or an overnight Terminal run).
 
