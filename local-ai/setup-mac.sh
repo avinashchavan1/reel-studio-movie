@@ -9,7 +9,7 @@ say() { printf '\n\033[1;35m== %s\033[0m\n' "$*"; }
 
 [[ "$(uname -m)" == "arm64" ]] || { echo "This script is for Apple Silicon Macs."; exit 1; }
 FREE_GB=$(df -g "$ROOT" | awk 'NR==2{print $4}')
-(( FREE_GB >= 36 )) || { echo "Need about 36 GB free disk, you have ${FREE_GB} GB."; exit 1; }
+(( FREE_GB >= 36 )) || echo "Note: ${FREE_GB} GB free; a fresh install needs about 36 GB (already-downloaded models are skipped)."
 
 say "Python"
 PY=""
