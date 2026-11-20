@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate character design options with the local ComfyUI server (start it first: bash local-ai/start-mac.sh).
 
-  python3 local-ai/generate.py                       # Ishita + Vihaan, full Z-Image (40 steps), 4 styles x 2 options
+  python3 local-ai/generate.py                       # Ishita + Vihaan, full Z-Image (50 steps, 1088x1920), 4 styles x 2 options
   python3 local-ai/generate.py -m zimage            # Z-Image Turbo, 8 steps (fast drafts)
   python3 local-ai/generate.py ishita -s pixar -n 8  # 8 Pixar-style options of one character
   python3 local-ai/generate.py all -m noobai         # whole cast with the anime SDXL model
@@ -34,7 +34,7 @@ def workflow(ckpt, pos, neg, seed, w=832, h=1216, steps=28, cfg=5.0):
     }
 
 
-def zimage_workflow(pos, neg, seed, w=896, h=1280, hq=False):
+def zimage_workflow(pos, neg, seed, w=1088, h=1920, hq=False):  # full 9:16 reel resolution
     return {
         "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "z_image_bf16.safetensors" if hq else "z_image_turbo_bf16.safetensors", "weight_dtype": "default"}},
         "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_3_4b.safetensors", "type": "lumina2", "device": "default"}},
@@ -44,7 +44,7 @@ def zimage_workflow(pos, neg, seed, w=896, h=1280, hq=False):
         "6": {"class_type": "CLIPTextEncode", "inputs": {"text": neg, "clip": ["2", 0]}} if hq else {"class_type": "ConditioningZeroOut", "inputs": {"conditioning": ["5", 0]}},
         "7": {"class_type": "EmptySD3LatentImage", "inputs": {"width": w, "height": h, "batch_size": 1}},
         "8": {"class_type": "KSampler", "inputs": {"model": ["4", 0], "positive": ["5", 0], "negative": ["6", 0], "latent_image": ["7", 0],
-                                                    "seed": seed, "steps": 40 if hq else 8, "cfg": 4.0 if hq else 1.0, "sampler_name": "res_multistep", "scheduler": "simple", "denoise": 1.0}},
+                                                    "seed": seed, "steps": 50 if hq else 8, "cfg": 4.0 if hq else 1.0, "sampler_name": "res_multistep", "scheduler": "simple", "denoise": 1.0}},
         "9": {"class_type": "VAEDecode", "inputs": {"samples": ["8", 0], "vae": ["3", 0]}},
         "10": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": "stf"}},
     }
