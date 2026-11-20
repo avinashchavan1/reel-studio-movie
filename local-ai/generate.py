@@ -15,7 +15,7 @@ SERVER = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
 MODELS = {"qwen": None, "qwen-fast": None, "zimage": None, "zimage-hq": None, "noobai": "NoobAI-XL-v1.1.safetensors", "animagine": "animagine-xl-4.0-opt.safetensors"}
 STYLES = {  # used with Z-Image (natural-language prompts)
     "pixar": "3D animated film still, stylized feature-animation character, soft subsurface skin, expressive big eyes, cinematic lighting, highly detailed",
-    "anime": "high quality modern anime illustration, clean lineart, cel shading, detailed eyes, beautiful background",
+    "anime": "high quality modern anime film still of young adult characters, mature adult proportions, clean lineart, cel shading, detailed expressive eyes, soft cinematic lighting, beautiful detailed background",
     "ghibli": "hand-painted 2D animation film still, warm watercolor backgrounds, gentle soft colors, whimsical storybook feel",
     "semireal": "semi-realistic digital painting, Indian webtoon style, soft painterly shading, detailed face, natural proportions",
 }
