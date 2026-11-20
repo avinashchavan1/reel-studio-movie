@@ -2,3 +2,4 @@ PRIVATE-*.md
 output/stills/
 node_modules/
 local-ai/out/
+local-ai/comfy.log
