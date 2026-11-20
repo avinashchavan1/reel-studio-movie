@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Strangers to Forever: local AI image studio for Apple Silicon Macs (M1/M2/M3/M4, 16 GB+; 32 GB recommended).
-# Installs ComfyUI + open models into ~/claude-projects/stf-ai. Safe to re-run (skips what is already there).
+# Installs ComfyUI + open models into ~/claude-projects/2-strangers/ai-studio. Safe to re-run (skips what is already there).
 # Usage:  bash local-ai/setup-mac.sh          then:  bash local-ai/start-mac.sh
 set -euo pipefail
-ROOT="${STF_AI_DIR:-$HOME/claude-projects/stf-ai}"
+ROOT="${STF_AI_DIR:-$HOME/claude-projects/2-strangers/ai-studio}"
 mkdir -p "$ROOT" && cd "$ROOT"
 say() { printf '\n\033[1;35m== %s\033[0m\n' "$*"; }
 
