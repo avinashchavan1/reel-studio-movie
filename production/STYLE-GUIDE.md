@@ -1,5 +1,14 @@
 # 🎨 Style Guide: "AI 2D Cartoon Story" look
 
+> **LOCKED (2026-11-20): modern anime film look, generated locally with Z-Image on the user's Mac.**
+> - Pipeline: `local-ai/` (ComfyUI + Z-Image full + Turbo, installed to `~/claude-projects/2-strangers/ai-studio`).
+>   Drafts with Turbo (`run-mac.sh <char> -m zimage -s anime`), finals by `--refine` with the full model.
+> - Approved leads: **Ishita option 2** (`out/ishita/ishita-anime-95592134.png`) and **Vihaan option 2**
+>   (`out/vihaan/vihaan-anime-1723354399.png`). Sheets: `output/designs/`.
+> - Supporting cast: Zoya draft done (`out/zoya/zoya-anime-204161517.png`); Tanvi, Appa, Amma in progress.
+> - Everyone reads as their real age (leads 19–20); prompts live in `local-ai/characters.json`.
+> - The 32 GB Mac runs Turbo at ~5 min/image; the full model needs Chrome closed (or an overnight Terminal run).
+
 The look you shared is usually called an **AI 2D animated story** or **Indian cartoon illustration style**:
 semi-realistic 2D, clean dark outlines, soft cel shading, warm daylight, detailed Indian streets and
 campuses. Every scene is an AI image, animated with an image-to-video tool, then voiced and edited.
