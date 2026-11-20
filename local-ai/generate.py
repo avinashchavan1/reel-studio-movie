@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate character design options with the local ComfyUI server (start it first: bash local-ai/start-mac.sh).
 
-  python3 local-ai/generate.py                       # Ishita + Vihaan, Z-Image, 4 styles x 2 options
+  python3 local-ai/generate.py                       # Ishita + Vihaan, Z-Image Turbo drafts, 4 styles x 2 options
+  python3 local-ai/generate.py -m zimage-hq -s anime # full Z-Image, 40 steps (best quality, slower)
   python3 local-ai/generate.py ishita -s pixar -n 8  # 8 Pixar-style options of one character
   python3 local-ai/generate.py all -m noobai         # whole cast with the anime SDXL model
 
@@ -11,7 +12,7 @@ import argparse, json, os, random, time, urllib.request, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERVER = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
-MODELS = {"zimage": None, "noobai": "NoobAI-XL-v1.1.safetensors", "animagine": "animagine-xl-4.0-opt.safetensors"}
+MODELS = {"zimage": None, "zimage-hq": None, "noobai": "NoobAI-XL-v1.1.safetensors", "animagine": "animagine-xl-4.0-opt.safetensors"}
 STYLES = {  # used with Z-Image (natural-language prompts)
     "pixar": "3D animated film still, stylized feature-animation character, soft subsurface skin, expressive big eyes, cinematic lighting, highly detailed",
     "anime": "high quality modern anime illustration, clean lineart, cel shading, detailed eyes, beautiful background",
@@ -33,17 +34,17 @@ def workflow(ckpt, pos, neg, seed, w=832, h=1216, steps=28, cfg=5.0):
     }
 
 
-def zimage_workflow(pos, neg, seed, w=896, h=1280, steps=8):
+def zimage_workflow(pos, neg, seed, w=896, h=1280, hq=False):
     return {
-        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "z_image_turbo_bf16.safetensors", "weight_dtype": "default"}},
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "z_image_bf16.safetensors" if hq else "z_image_turbo_bf16.safetensors", "weight_dtype": "default"}},
         "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_3_4b.safetensors", "type": "lumina2", "device": "default"}},
         "3": {"class_type": "VAELoader", "inputs": {"vae_name": "z_image_ae.safetensors"}},
         "4": {"class_type": "ModelSamplingAuraFlow", "inputs": {"model": ["1", 0], "shift": 3.0}},
         "5": {"class_type": "CLIPTextEncode", "inputs": {"text": pos, "clip": ["2", 0]}},
-        "6": {"class_type": "ConditioningZeroOut", "inputs": {"conditioning": ["5", 0]}},
+        "6": {"class_type": "CLIPTextEncode", "inputs": {"text": neg, "clip": ["2", 0]}} if hq else {"class_type": "ConditioningZeroOut", "inputs": {"conditioning": ["5", 0]}},
         "7": {"class_type": "EmptySD3LatentImage", "inputs": {"width": w, "height": h, "batch_size": 1}},
         "8": {"class_type": "KSampler", "inputs": {"model": ["4", 0], "positive": ["5", 0], "negative": ["6", 0], "latent_image": ["7", 0],
-                                                    "seed": seed, "steps": steps, "cfg": 1.0, "sampler_name": "res_multistep", "scheduler": "simple", "denoise": 1.0}},
+                                                    "seed": seed, "steps": 40 if hq else 8, "cfg": 4.0 if hq else 1.0, "sampler_name": "res_multistep", "scheduler": "simple", "denoise": 1.0}},
         "9": {"class_type": "VAEDecode", "inputs": {"samples": ["8", 0], "vae": ["3", 0]}},
         "10": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": "stf"}},
     }
@@ -86,13 +87,13 @@ def main():
         raise SystemExit(f"ComfyUI is not running at {SERVER}. Start it in another terminal: bash local-ai/start-mac.sh")
     for c in who:
         os.makedirs(os.path.join(HERE, "out", c), exist_ok=True)
-        for st in (styles if a.m == "zimage" else [a.m]):
+        for st in (styles if a.m.startswith("zimage") else [a.m]):
             for i in range(a.n):
                 seed = random.randint(1, 2**31)
                 dest = os.path.join(HERE, "out", c, f"{c}-{st}-{seed}.png")
                 t = time.time()
-                if a.m == "zimage":
-                    wf = zimage_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", "", seed)
+                if a.m.startswith("zimage"):
+                    wf = zimage_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", cfg["negative"], seed, hq=a.m == "zimage-hq")
                 else:
                     wf = workflow(MODELS[a.m], f"{cfg['characters'][c]}, {cfg['quality']}", cfg["negative"], seed)
                 run(wf, dest)

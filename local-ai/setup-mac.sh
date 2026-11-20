@@ -9,7 +9,7 @@ say() { printf '\n\033[1;35m== %s\033[0m\n' "$*"; }
 
 [[ "$(uname -m)" == "arm64" ]] || { echo "This script is for Apple Silicon Macs."; exit 1; }
 FREE_GB=$(df -g "$ROOT" | awk 'NR==2{print $4}')
-(( FREE_GB >= 22 )) || { echo "Need about 22 GB free disk, you have ${FREE_GB} GB."; exit 1; }
+(( FREE_GB >= 36 )) || { echo "Need about 36 GB free disk, you have ${FREE_GB} GB."; exit 1; }
 
 say "Python"
 PY=""
@@ -32,16 +32,20 @@ pip install -q torch torchvision torchaudio
 pip install -q -r requirements.txt
 python -c "import torch; print('Apple GPU (MPS) available:', torch.backends.mps.is_available())"
 
-say "Models (about 21 GB, resumable)"
+say "Models (about 33 GB, resumable)"
 get() { # url  dest
   if [[ -s "$2" ]]; then echo "have $(basename "$2")"; else echo "downloading $(basename "$2")"; curl -L --fail -C - -o "$2.part" "$1" && mv "$2.part" "$2"; fi
 }
 HF=https://huggingface.co
-# Main model: Z-Image Turbo (Apache-2.0, 6B, 8 steps): best quality that fits a 32 GB Apple Silicon Mac (~21 GB)
+# Z-Image (Apache-2.0, free for commercial use), full bf16 precision, ~33 GB:
+#   z_image_bf16        = full model, 40 steps: best quality (finals)
+#   z_image_turbo_bf16  = distilled, 8 steps: fast drafts
+ZB="$HF/Comfy-Org/Z-Image/resolve/main/split_files"
 ZI="$HF/Comfy-Org/Z-Image-Turbo/resolve/main/split_files"
-get "$ZI/diffusion_models/z_image_turbo_bf16.safetensors" models/diffusion_models/z_image_turbo_bf16.safetensors
 get "$ZI/text_encoders/qwen_3_4b.safetensors" models/text_encoders/qwen_3_4b.safetensors
 get "$ZI/vae/ae.safetensors" models/vae/z_image_ae.safetensors
+get "$ZB/diffusion_models/z_image_bf16.safetensors" models/diffusion_models/z_image_bf16.safetensors
+get "$ZI/diffusion_models/z_image_turbo_bf16.safetensors" models/diffusion_models/z_image_turbo_bf16.safetensors
 # Optional anime model (STF_ANIME=1): NoobAI-XL 1.1, a top Illustrious-family anime model (~7 GB)
 if [[ "${STF_ANIME:-0}" == "1" ]]; then
   get "$HF/Laxhar/noobai-XL-1.1/resolve/main/NoobAI-XL-v1.1.safetensors" models/checkpoints/NoobAI-XL-v1.1.safetensors
