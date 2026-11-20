@@ -124,6 +124,7 @@ def main():
     ap.add_argument("-m", choices=list(MODELS), default="zimage-hq")
     ap.add_argument("--size", default="832x1472", help="WxH; 832x1472 fits a 32 GB Mac comfortably, 1088x1920 is full reel size (needs lots of free RAM)")
     ap.add_argument("--refine", metavar="PNG", help="refine a chosen draft with the full model (keeps the face); use with one character id")
+    ap.add_argument("--steps", type=int, default=20, help="refine steps (14-20 fits one 30-min run on an M1 Pro)")
     ap.add_argument("--denoise", type=float, default=0.4, help="refine strength: 0.3 subtle .. 0.5 stronger")
     ap.add_argument("-s", "--style", default="all", help="zimage style: " + ", ".join(STYLES) + " or all")
     a = ap.parse_args()
@@ -144,7 +145,7 @@ def main():
         os.makedirs(os.path.join(HERE, "final"), exist_ok=True)
         dest = os.path.join(HERE, "final", f"{c}-{st}-final.png")
         t = time.time()
-        run(refine_workflow(name, f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", cfg["negative"], random.randint(1, 2**31), a.denoise), dest)
+        run(refine_workflow(name, f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", cfg["negative"], random.randint(1, 2**31), a.denoise, a.steps), dest)
         print(f"{os.path.relpath(dest, HERE)}  ({time.time() - t:.0f}s)", flush=True)
         return
     for c in who:
