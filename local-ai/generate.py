@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Generate character design options with the local ComfyUI server (start it first: bash local-ai/start-mac.sh).
 
-  python3 local-ai/generate.py                       # Ishita + Vihaan, Qwen-Image 2.1 full (25 steps), 4 styles x 2 options
-  python3 local-ai/generate.py -m qwen-fast          # Qwen-Image 2.1 + turbo LoRA, 8 steps (drafts)
+  python3 local-ai/generate.py                       # Ishita + Vihaan, full Z-Image (40 steps), 4 styles x 2 options
+  python3 local-ai/generate.py -m zimage            # Qwen-Image 2.1 + turbo LoRA (only if its files are installed)
   python3 local-ai/generate.py ishita -s pixar -n 8  # 8 Pixar-style options of one character
   python3 local-ai/generate.py all -m noobai         # whole cast with the anime SDXL model
 
@@ -103,7 +103,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("who", nargs="?", default="leads", help="character id, 'leads' (ishita+vihaan) or 'all'")
     ap.add_argument("-n", type=int, default=2, help="options per character per style")
-    ap.add_argument("-m", choices=list(MODELS), default="qwen")
+    ap.add_argument("-m", choices=list(MODELS), default="zimage-hq")
     ap.add_argument("-s", "--style", default="all", help="zimage style: " + ", ".join(STYLES) + " or all")
     a = ap.parse_args()
     who = ["ishita", "vihaan"] if a.who == "leads" else list(cfg["characters"]) if a.who == "all" else [a.who]

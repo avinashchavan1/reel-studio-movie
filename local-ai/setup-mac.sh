@@ -9,7 +9,7 @@ say() { printf '\n\033[1;35m== %s\033[0m\n' "$*"; }
 
 [[ "$(uname -m)" == "arm64" ]] || { echo "This script is for Apple Silicon Macs."; exit 1; }
 FREE_GB=$(df -g "$ROOT" | awk 'NR==2{print $4}')
-(( FREE_GB >= 35 )) || { echo "Need about 35 GB free disk, you have ${FREE_GB} GB."; exit 1; }
+(( FREE_GB >= 36 )) || { echo "Need about 36 GB free disk, you have ${FREE_GB} GB."; exit 1; }
 
 say "Python"
 PY=""
@@ -37,15 +37,15 @@ get() { # url  dest
   if [[ -s "$2" ]]; then echo "have $(basename "$2")"; else echo "downloading $(basename "$2")"; curl -L --fail -C - -o "$2.part" "$1" && mv "$2.part" "$2"; fi
 }
 HF=https://huggingface.co
-# Qwen-Image 2.1 (Sep 2026, Qwen research licence: non-commercial), full bf16 precision for Apple GPUs, ~33 GB.
-#   qwen_image_2.1_bf16 + qwen3vl_8b text encoder + VAE; turbo LoRA for fast 8-step drafts.
-#   (The int8 files in the template need NVIDIA kernels, so the Mac uses bf16.)
-QI="$HF/Comfy-Org/Qwen-Image-2.1/resolve/main"
-mkdir -p models/diffusion_models models/text_encoders models/vae models/loras
-get "$QI/vae/qwen_image_2.1_vae_bf16.safetensors" models/vae/qwen_image_2.1_vae_bf16.safetensors
-get "$QI/loras/qwen_image_2.1_turbo_lora_avg_rank_178_bf16.safetensors" models/loras/qwen_image_2.1_turbo_lora_avg_rank_178_bf16.safetensors
-get "$QI/diffusion_models/qwen_image_2.1_bf16.safetensors" models/diffusion_models/qwen_image_2.1_bf16.safetensors
-get "$QI/text_encoders/qwen3vl_8b_bf16.safetensors" models/text_encoders/qwen3vl_8b_bf16.safetensors
+# Z-Image (Apache-2.0, free for commercial use), full bf16 precision, ~33 GB:
+#   z_image_bf16        = full model, 40 steps: best quality (finals)
+#   z_image_turbo_bf16  = distilled, 8 steps: fast drafts
+ZB="$HF/Comfy-Org/Z-Image/resolve/main/split_files"
+ZI="$HF/Comfy-Org/Z-Image-Turbo/resolve/main/split_files"
+get "$ZI/text_encoders/qwen_3_4b.safetensors" models/text_encoders/qwen_3_4b.safetensors
+get "$ZI/vae/ae.safetensors" models/vae/z_image_ae.safetensors
+get "$ZB/diffusion_models/z_image_bf16.safetensors" models/diffusion_models/z_image_bf16.safetensors
+get "$ZI/diffusion_models/z_image_turbo_bf16.safetensors" models/diffusion_models/z_image_turbo_bf16.safetensors
 # Optional anime model (STF_ANIME=1): NoobAI-XL 1.1, a top Illustrious-family anime model (~7 GB)
 if [[ "${STF_ANIME:-0}" == "1" ]]; then
   get "$HF/Laxhar/noobai-XL-1.1/resolve/main/NoobAI-XL-v1.1.safetensors" models/checkpoints/NoobAI-XL-v1.1.safetensors
