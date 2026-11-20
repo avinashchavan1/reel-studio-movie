@@ -2,7 +2,7 @@
 """Generate character design options with the local ComfyUI server (start it first: bash local-ai/start-mac.sh).
 
   python3 local-ai/generate.py                       # Ishita + Vihaan, full Z-Image (40 steps), 4 styles x 2 options
-  python3 local-ai/generate.py -m zimage            # Qwen-Image 2.1 + turbo LoRA (only if its files are installed)
+  python3 local-ai/generate.py -m zimage            # Z-Image Turbo, 8 steps (fast drafts)
   python3 local-ai/generate.py ishita -s pixar -n 8  # 8 Pixar-style options of one character
   python3 local-ai/generate.py all -m noobai         # whole cast with the anime SDXL model
 
