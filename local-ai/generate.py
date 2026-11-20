@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate character design options with the local ComfyUI server (start it first: bash local-ai/start-mac.sh).
 
-  python3 local-ai/generate.py                       # Ishita + Vihaan, full Z-Image (50 steps, 1088x1920), 4 styles x 2 options
+  python3 local-ai/generate.py                       # Ishita + Vihaan, full Z-Image (50 steps, 832x1472), 4 styles x 2 options
   python3 local-ai/generate.py -m zimage            # Z-Image Turbo, 8 steps (fast drafts)
   python3 local-ai/generate.py ishita -s pixar -n 8  # 8 Pixar-style options of one character
   python3 local-ai/generate.py all -m noobai         # whole cast with the anime SDXL model
@@ -104,9 +104,11 @@ def main():
     ap.add_argument("who", nargs="?", default="leads", help="character id, 'leads' (ishita+vihaan) or 'all'")
     ap.add_argument("-n", type=int, default=2, help="options per character per style")
     ap.add_argument("-m", choices=list(MODELS), default="zimage-hq")
+    ap.add_argument("--size", default="832x1472", help="WxH; 832x1472 fits a 32 GB Mac comfortably, 1088x1920 is full reel size (needs lots of free RAM)")
     ap.add_argument("-s", "--style", default="all", help="zimage style: " + ", ".join(STYLES) + " or all")
     a = ap.parse_args()
     who = ["ishita", "vihaan"] if a.who == "leads" else list(cfg["characters"]) if a.who == "all" else [a.who]
+    W, H = (int(v) for v in a.size.lower().split("x"))
     styles = list(STYLES) if a.style == "all" else a.style.split(",")
     try:
         call("/system_stats")
@@ -122,7 +124,7 @@ def main():
                 if a.m.startswith("qwen"):
                     wf = qwen_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Clearly Indian features and natural Indian skin tone, wholesome, vertical 9:16 frame, no text or watermark.", cfg["negative"], seed, fast=a.m == "qwen-fast")
                 elif a.m.startswith("zimage"):
-                    wf = zimage_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", cfg["negative"], seed, hq=a.m == "zimage-hq")
+                    wf = zimage_workflow(f"{STYLES[st]}. {cfg['characters'][c]}. Indian features, natural Indian skin tone, wholesome, no text", cfg["negative"], seed, w=W, h=H, hq=a.m == "zimage-hq")
                 else:
                     wf = workflow(MODELS[a.m], f"{cfg['characters'][c]}, {cfg['quality']}", cfg["negative"], seed)
                 run(wf, dest)
