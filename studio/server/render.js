@@ -29,7 +29,7 @@ export function buildTimeline(project, ep, variant = 'instagram') {
         lt += d + GAP;
       }
     }
-    const dur = Math.max(s.minDuration || 3, lt - start - GAP + TAIL);
+    const dur = Math.max(s.minDuration || 3, lt - start - GAP + (s.tail ?? TAIL));
     shots.push({ ...s, lines, start, dur });
     t += dur;
   }

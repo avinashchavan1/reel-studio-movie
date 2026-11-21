@@ -227,7 +227,7 @@ window.renderFrame = (t, fmt = 'image/jpeg') => {
   const shot = shots[i], lt = t - shot.start;
   if (IMG[shot.id]) { // painted shot
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); photo(shot, lt);
-    const place = PL[shot.location]; if (shot.params?.showLocation && place) locationChip(ctx, place.name, 420, prog(lt, .2, .5));
+    const place = PL[shot.location]; if (shot.params?.showLocation && place) locationChip(ctx, place.name, 1290, prog(lt, .2, .5));
     if (shot.template === 'hook' && shot.params?.hook) hookText(shot.params.hook, lt);
     if (shot.template === 'cliffhanger') cliffText(shot, lt);
     paintedDialogue(shot, t);

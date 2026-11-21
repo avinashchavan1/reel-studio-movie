@@ -1323,7 +1323,8 @@
               }
             }
           ],
-          "image": "/media/shots/ep01/s07-campus.png"
+          "image": "/media/shots/ep01/s07-campus.png",
+          "tail": 0.35
         },
         {
           "id": "sh_52y0981",
@@ -1520,25 +1521,25 @@
       },
       "renders": {
         "instagram": {
-          "url": "/media/renders/ep01-instagram-1795115434176.mp4",
-          "poster": "/media/renders/ep01-instagram-1795115434176.jpg",
-          "duration": 40.74,
-          "at": "2026-11-19T19:11:17.900Z",
+          "url": "/media/renders/ep01-instagram-1795237271347.mp4",
+          "poster": "/media/renders/ep01-instagram-1795237271347.jpg",
+          "duration": 40.704,
+          "at": "2026-11-21T05:02:25.514Z",
           "variant": "instagram"
         },
         "youtube": {
-          "url": "/media/renders/ep01-youtube-1795115478047.mp4",
-          "poster": "/media/renders/ep01-youtube-1795115478047.jpg",
-          "duration": 40.74,
-          "at": "2026-11-19T19:12:01.385Z",
+          "url": "/media/renders/ep01-youtube-1795237346738.mp4",
+          "poster": "/media/renders/ep01-youtube-1795237346738.jpg",
+          "duration": 40.704,
+          "at": "2026-11-21T05:03:42.227Z",
           "variant": "youtube"
         }
       },
       "render": {
-        "url": "/media/renders/ep01-instagram-1795115434176.mp4",
-        "poster": "/media/renders/ep01-instagram-1795115434176.jpg",
-        "duration": 40.74,
-        "at": "2026-11-19T19:11:17.900Z",
+        "url": "/media/renders/ep01-instagram-1795237271347.mp4",
+        "poster": "/media/renders/ep01-instagram-1795237271347.jpg",
+        "duration": 40.704,
+        "at": "2026-11-21T05:02:25.514Z",
         "variant": "instagram"
       }
     }
