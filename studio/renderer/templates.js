@@ -11,8 +11,62 @@ window.boot = async spec => {
   for (const [fam, url, w] of fonts) { try { document.fonts.add(await new FontFace(fam, `url(${url})`, { weight: String(w) }).load()); } catch (e) { console.warn('font', url, e); } }
   spec.characters.forEach(c => { CH[c.id] = c; });
   spec.places.forEach(p => { PL[p.id] = p; });
+  // AI-drawn shot art (local Z-Image), served from studio/data/media
+  await Promise.all(spec.shots.filter(s => s.image).map(s => new Promise(res => {
+    const im = new Image(); im.onload = () => { IMG[s.id] = im; res(); }; im.onerror = () => { console.warn('image missing', s.image); res(); };
+    im.src = s.imageData || '../data' + s.image;
+  })));
   window.READY = true;
 };
+
+// ---------- painted shots: camera move + light + grading ----------
+const IMG = {};
+const MOVES = { // [scale0, scale1, dx0, dx1, dy0, dy1] (offsets as a share of the frame)
+  in: [1.03, 1.14, 0, 0, 0, 0], out: [1.16, 1.04, 0, 0, 0, 0],
+  left: [1.13, 1.13, .045, -.045, 0, 0], right: [1.13, 1.13, -.045, .045, 0, 0],
+  up: [1.13, 1.13, 0, 0, .04, -.04], down: [1.13, 1.13, 0, 0, -.04, .04],
+};
+function photo(shot, lt) {
+  const im = IMG[shot.id], p = shot.params || {}, m = MOVES[p.move || 'in'];
+  const q = clamp(lt / shot.dur), e = q * q * (3 - 2 * q);
+  const s = lerp(m[0], m[1], e), dx = lerp(m[2], m[3], e) * W, dy = lerp(m[4], m[5], e) * H;
+  const shake = p.shake ? Math.sin(lt * 31) * 2.2 + Math.sin(lt * 17) * 1.4 : 0;
+  const base = Math.max(W / im.width, H / im.height), dw = im.width * base * s, dh = im.height * base * s;
+  const x = (W - dw) / 2 + dx, y = (H - dh) / 2 + dy + shake;
+  ctx.drawImage(im, x, y, dw, dh);
+  if (p.blur) { // hide AI pseudo-text (e.g. the admission letter)
+    const [x0, y0, x1, y1] = p.blur; ctx.save(); ctx.beginPath(); ctx.rect(x + x0 * dw, y + y0 * dh, (x1 - x0) * dw, (y1 - y0) * dh); ctx.clip();
+    ctx.filter = 'blur(10px)'; ctx.drawImage(im, x, y, dw, dh); ctx.filter = 'none'; ctx.restore();
+  }
+  if (p.glow) { // pulsing light source (wifi icon, phone screen)
+    const [gx, gy, col] = p.glow, k = .55 + .45 * Math.sin(lt * 4.5);
+    const g = ctx.createRadialGradient(x + gx * dw, y + gy * dh, 0, x + gx * dw, y + gy * dh, 260);
+    g.addColorStop(0, `rgba(${col || '120,220,255'},${.42 * k})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore();
+  }
+  // drifting light motes
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 26; i++) {
+    const r = Math.sin(i * 91.7) * .5 + .5, r2 = Math.sin(i * 37.3) * .5 + .5;
+    const mx = (r * W + Math.sin(lt * .6 + i) * 30) % W, my = H - ((r2 * H + lt * (24 + r * 30)) % H);
+    const a = .10 + .14 * (Math.sin(lt * 2 + i) * .5 + .5), rad = 2 + r2 * 4;
+    ctx.fillStyle = `rgba(255,240,215,${a})`; ctx.beginPath(); ctx.arc(mx, my, rad, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+  // grading: soft vignette + darker bottom for captions
+  const v = ctx.createRadialGradient(W / 2, H * .45, H * .3, W / 2, H * .45, H * .75);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(10,5,25,.38)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  const b = ctx.createLinearGradient(0, H * .62, 0, H); b.addColorStop(0, 'rgba(10,5,25,0)'); b.addColorStop(1, 'rgba(10,5,25,.5)');
+  ctx.fillStyle = b; ctx.fillRect(0, H * .62, W, H * .38);
+  if (shot.template === 'cliffhanger') { ctx.fillStyle = `rgba(10,5,25,${.45 * prog(lt, .3, .8)})`; ctx.fillRect(0, 0, W, H); }
+}
+function paintedDialogue(shot, t) {
+  const line = activeLine(shot, t); if (!line || !line.text) return;
+  if (shot.template === 'cliffhanger' && line.speaker === 'narrator') return; // the big cliffhanger text already says it
+  const lt = t - line.start, y = 1500;
+  caption(ctx, line.text, lt, { delay: 0, accent: CH[line.speaker]?.color || C.pink, y });
+  if (line.speaker !== 'narrator' && CH[line.speaker]) chip(ctx, CH[line.speaker].name, 230, y - 118, ease.back(prog(lt, 0, .3)), CH[line.speaker].color || C.rose, '#fff', 32);
+}
 
 const LOOK2 = { tara: 'ishita', kabir: 'vihaan', zoya: 'zoya', pihu: 'tanvi', appa: 'appa', amma: 'amma' };
 const lookOf = id => { const c = CH[id]; if (!c || !c.look) return null; return CAST2[c.look] || CAST2[LOOK2[c.look]] || null; };
@@ -171,6 +225,17 @@ function speakerPositions(shot) {
 window.renderFrame = (t, fmt = 'image/jpeg') => {
   const shots = SPEC.shots; let i = shots.findIndex(s => t < s.start + s.dur); if (i < 0) i = shots.length - 1;
   const shot = shots[i], lt = t - shot.start;
+  if (IMG[shot.id]) { // painted shot
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); photo(shot, lt);
+    const place = PL[shot.location]; if (shot.params?.showLocation && place) locationChip(ctx, place.name, 420, prog(lt, .2, .5));
+    if (shot.template === 'hook' && shot.params?.hook) hookText(shot.params.hook, lt);
+    if (shot.template === 'cliffhanger') cliffText(shot, lt);
+    paintedDialogue(shot, t);
+    banner(SPEC.episode);
+    const fin = i === 0 ? 1 : clamp(lt / .3), fout = i === shots.length - 1 ? clamp((shot.dur - lt) / .5) : clamp((shot.dur - lt) / .3);
+    const a = 1 - Math.min(fin, fout); if (a > 0) { ctx.fillStyle = `rgba(8,4,20,${a})`; ctx.fillRect(0, 0, W, H); }
+    return ctx.canvas.toDataURL(fmt, .92);
+  }
   ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
   const z = 1 + 0.045 * Math.min(1, lt / shot.dur); // slow push-in on every shot
   ctx.translate(W / 2, H * 0.55); ctx.scale(z, z); ctx.translate(-W / 2, -H * 0.55);

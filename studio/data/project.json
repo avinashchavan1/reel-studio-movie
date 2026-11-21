@@ -254,7 +254,13 @@
           "mood": "tension",
           "minDuration": 3,
           "params": {
-            "hook": "Ek WiFi hotspot ne do strangers ko mila diya..."
+            "hook": "Ek WiFi hotspot ne do strangers ko mila diya...",
+            "move": "in",
+            "glow": [
+              0.22,
+              0.6,
+              "120,220,255"
+            ]
           },
           "lines": [
             {
@@ -393,7 +399,8 @@
                 "at": "2026-11-19T18:30:40.678Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s01-hook.png"
         },
         {
           "id": "sh_pa1gvl8",
@@ -405,7 +412,8 @@
           "mood": "homely",
           "minDuration": 3,
           "params": {
-            "showLocation": true
+            "showLocation": true,
+            "move": "up"
           },
           "lines": [
             {
@@ -553,7 +561,8 @@
                 "at": "2026-11-19T18:50:45.989Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s02-hometown.png"
         },
         {
           "id": "sh_c0e06qu",
@@ -566,7 +575,15 @@
           ],
           "mood": "emotional",
           "minDuration": 3,
-          "params": {},
+          "params": {
+            "move": "in",
+            "blur": [
+              0.37,
+              0.37,
+              0.72,
+              0.53
+            ]
+          },
           "lines": [
             {
               "id": "ln_cyr9l4t",
@@ -746,7 +763,8 @@
                 "at": "2026-11-20T20:15:11.668Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s03-home.png"
         },
         {
           "id": "sh_uhb6nzi",
@@ -757,7 +775,10 @@
           ],
           "mood": "journey",
           "minDuration": 3,
-          "params": {},
+          "params": {
+            "move": "right",
+            "shake": true
+          },
           "lines": [
             {
               "id": "ln_ys3sbjd",
@@ -856,7 +877,8 @@
                 "at": "2026-11-19T18:30:46.950Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s04-train.png"
         },
         {
           "id": "sh_m9cqh05",
@@ -868,7 +890,8 @@
           "mood": "city",
           "minDuration": 3,
           "params": {
-            "showLocation": true
+            "showLocation": true,
+            "move": "out"
           },
           "lines": [
             {
@@ -985,7 +1008,8 @@
                 "at": "2026-11-19T18:30:48.711Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s05-bangalore.png"
         },
         {
           "id": "sh_rf1i6mj",
@@ -997,7 +1021,9 @@
           ],
           "mood": "playful",
           "minDuration": 3,
-          "params": {},
+          "params": {
+            "move": "in"
+          },
           "lines": [
             {
               "id": "ln_ml363t1",
@@ -1087,7 +1113,8 @@
                 "at": "2026-11-19T18:30:50.131Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s06-hostel.png"
         },
         {
           "id": "sh_iah77ar",
@@ -1107,7 +1134,8 @@
             "right": {
               "label": "ORCHID BLOCK",
               "sub": "Section 1"
-            }
+            },
+            "move": "left"
           },
           "lines": [
             {
@@ -1294,7 +1322,8 @@
                 "at": "2026-11-19T18:30:51.936Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s07-campus.png"
         },
         {
           "id": "sh_52y0981",
@@ -1308,7 +1337,13 @@
               "Phir ek din...",
               "ek hotspot ON hua..."
             ],
-            "next": "EP 2 · THE SMARTPHONE"
+            "next": "EP 2 · THE SMARTPHONE",
+            "move": "in",
+            "glow": [
+              0.17,
+              0.63,
+              "140,230,255"
+            ]
           },
           "lines": [
             {
@@ -1444,7 +1479,8 @@
                 "at": "2026-11-19T18:30:53.595Z"
               }
             }
-          ]
+          ],
+          "image": "/media/shots/ep01/s08-cliffhanger.png"
         }
       ],
       "musicVolume": 0.22,

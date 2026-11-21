@@ -73,7 +73,13 @@ export async function renderEpisode(timeline, { music, musicVolume = 0.22, still
     const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
     page.on('pageerror', e => console.error('[renderer]', e.message));
     await page.goto('file://' + path.join(ROOT, 'renderer', 'player.html'));
-    await page.evaluate(spec => window.boot(spec), timeline);
+    // painted shot art is embedded as data URLs (file:// images would taint the canvas)
+    const spec = { ...timeline, shots: timeline.shots.map(s => {
+      if (!s.image) return s; const f = mediaPath(s.image); if (!fs.existsSync(f)) return s;
+      const mime = f.endsWith('.png') ? 'image/png' : 'image/jpeg';
+      return { ...s, imageData: `data:${mime};base64,${fs.readFileSync(f).toString('base64')}` };
+    }) };
+    await page.evaluate(spec => window.boot(spec), spec);
     await page.waitForFunction(() => window.READY === true, null, { timeout: 30000 });
 
     if (stills) { // quick preview frames
