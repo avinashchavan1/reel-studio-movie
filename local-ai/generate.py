@@ -182,7 +182,7 @@ def main():
                 src = os.path.join(HERE, "..", "studio", "data", "media", "shots", sp["episode"], shot["id"] + ".png")
                 name = f"stf_{sp['episode']}_{shot['id']}.png"; shutil.copy(src, os.path.join(inp, name))
                 seed = random.randint(1, 2**31); dest = os.path.join(vdir, f"{shot['id']}.mp4"); t = time.time()
-                run(wan_i2v_workflow(name, shot.get("motion", "subtle natural motion, blinking, breathing, gentle breeze") + ". Anime style, consistent characters, smooth natural motion", seed, vw, vh, a.frames, a.vsteps), dest)
+                run(wan_i2v_workflow(name, shot.get("motion", "subtle natural motion, blinking, breathing, gentle breeze") + ". Same characters as in the image: same faces, dark brown eyes, black hair, same outfits. Anime style, smooth natural motion, nothing passes in front of the faces", seed, vw, vh, a.frames, a.vsteps), dest)
                 print(f"{os.path.relpath(dest, HERE)}  ({time.time() - t:.0f}s)", flush=True)
             return
         for i, shot in enumerate(sp["shots"], 1):
