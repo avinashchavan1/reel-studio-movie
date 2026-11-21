@@ -11,35 +11,43 @@
   "shots": [
     {
       "id": "s01-hook",
-      "prompt": "two separate side-by-side panels divided by a thin glowing vertical line, like a split screen comic frame. LEFT PANEL: ISHITA alone on her bed in a girls hostel room at night, looking at her glowing phone. RIGHT PANEL: VIHAAN alone at his desk in a boys hostel room at night, looking at his glowing phone. They are in different rooms and do not see each other. A small glowing wifi symbol sits on the dividing line. Moody blue and pink night lighting"
+      "prompt": "two separate side-by-side panels divided by a thin glowing vertical line, like a split screen comic frame. LEFT PANEL: ISHITA alone on her bed in a girls hostel room at night, looking at her glowing phone. RIGHT PANEL: VIHAAN alone at his desk in a boys hostel room at night, looking at his glowing phone. They are in different rooms and do not see each other. A small glowing wifi symbol sits on the dividing line. Moody blue and pink night lighting",
+      "motion": "both young people look down at their glowing phones in their separate rooms, they blink and breathe, slight head movement, phone screen light flickers softly on their faces, static camera"
     },
     {
       "id": "s02-hometown",
-      "prompt": "ISHITA standing on the terrace of a small house in a quiet Karnataka town at sunrise, looking at the sky with a dreamy hopeful smile, red tiled roofs, coconut trees and a temple tower in the distance, warm golden light"
+      "prompt": "ISHITA standing on the terrace of a small house in a quiet Karnataka town at sunrise, looking at the sky with a dreamy hopeful smile, red tiled roofs, coconut trees and a temple tower in the distance, warm golden light",
+      "motion": "the girl gazes at the sunrise, a gentle breeze moves her braid and dupatta, she smiles softly and blinks, birds fly across the sky, slow camera push in"
     },
     {
       "id": "s03-home",
-      "prompt": "inside a modest Indian living room: DAD standing and holding up an engineering college admission letter with a firm serious face, MOM beside him looking proud but worried, ISHITA sitting on the sofa with teary eyes looking down, warm evening lamp light, emotional"
+      "prompt": "inside a modest Indian living room: DAD standing and holding up an engineering college admission letter with a firm serious face, MOM beside him looking proud but worried, ISHITA sitting on the sofa with teary eyes looking down, warm evening lamp light, emotional",
+      "motion": "the father talks firmly while holding up the letter, the mother looks at him worried, the daughter lowers her eyes sadly and a tear rolls down, subtle movements"
     },
     {
       "id": "s04-train",
-      "prompt": "ISHITA sitting by the window of an Indian sleeper train with a suitcase beside her, looking out at passing green fields with a bittersweet expression, wind moving her braid, soft afternoon light"
+      "prompt": "ISHITA sitting by the window of an Indian sleeper train with a suitcase beside her, looking out at passing green fields with a bittersweet expression, wind moving her braid, soft afternoon light",
+      "motion": "the girl sits by the train window, the train sways gently, green fields rush past outside, wind moves loose strands of her hair, she blinks and sighs"
     },
     {
       "id": "s05-bangalore",
-      "prompt": "wide shot: ISHITA holding a suitcase on a busy Bangalore street, looking up in awe at tall glass buildings, a metro bridge, auto rickshaws and traffic around her, she looks small and overwhelmed, bright day"
+      "prompt": "wide shot: ISHITA holding a suitcase on a busy Bangalore street, looking up in awe at tall glass buildings, a metro bridge, auto rickshaws and traffic around her, she looks small and overwhelmed, bright day",
+      "motion": "the girl looks around the busy street in awe, auto rickshaws and cars drive past behind her, she slowly turns her head and blinks"
     },
     {
       "id": "s06-hostel",
-      "prompt": "a cozy girls hostel room with bunk beds and fairy lights: ZOYA grinning playfully with an arm around ISHITA, who laughs shyly, both sitting on the lower bunk, warm evening light, fun friendship"
+      "prompt": "a cozy girls hostel room with bunk beds and fairy lights: ZOYA grinning playfully with an arm around ISHITA, who laughs shyly, both sitting on the lower bunk, warm evening light, fun friendship",
+      "motion": "the two girls laugh together, the girl with glasses hugs her friend and talks happily, fairy lights twinkle, cozy warm atmosphere"
     },
     {
       "id": "s07-campus",
-      "prompt": "two separate side-by-side panels divided by a thin glowing vertical line, like a split screen comic frame. LEFT PANEL: ISHITA walking alone with books past a college academic building in bright morning light. RIGHT PANEL: VIHAAN walking alone with his backpack past a different college building. They are in different places and never see each other. Plain buildings with no signboards"
+      "prompt": "two separate side-by-side panels divided by a thin glowing vertical line, like a split screen comic frame. LEFT PANEL: ISHITA walking alone with books past a college academic building in bright morning light. RIGHT PANEL: VIHAAN walking alone with his backpack past a different college building. They are in different places and never see each other. Plain buildings with no signboards",
+      "motion": "in each panel the student walks forward toward the camera, the girl holds her books, the boy's backpack bounces slightly, leaves sway in the breeze"
     },
     {
       "id": "s08-cliffhanger",
-      "prompt": "close-up of a hand holding a smartphone in a dark hostel room at night, the phone screen glowing brightly with a wifi signal icon, dramatic light on the face of ISHITA in the background looking surprised, suspenseful"
+      "prompt": "close-up of a hand holding a smartphone in a dark hostel room at night, the phone screen glowing brightly with a wifi signal icon, dramatic light on the face of ISHITA in the background looking surprised, suspenseful",
+      "motion": "the girl stares at her glowing phone with wide surprised eyes, the screen light flickers on her face, she slowly leans closer to the phone"
     }
   ]
 }

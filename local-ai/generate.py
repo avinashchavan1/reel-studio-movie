@@ -95,6 +95,28 @@ def refine_workflow(image_name, pos, neg, seed, denoise=0.4, steps=20):  # Comfy
     }
 
 
+WAN_NEG = "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+
+
+def wan_i2v_workflow(image_name, prompt, seed, w=544, h=960, length=121, steps=20, cfg=5.0):
+    """Wan 2.2 TI2V-5B image-to-video (mirrors ComfyUI's official template): painted shot -> 5 s clip at 24 fps."""
+    return {
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "wan2.2_ti2v_5B_fp16.safetensors", "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors", "type": "wan", "device": "default"}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "wan2.2_vae.safetensors"}},
+        "4": {"class_type": "ModelSamplingSD3", "inputs": {"model": ["1", 0], "shift": 8.0}},
+        "5": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
+        "6": {"class_type": "CLIPTextEncode", "inputs": {"text": WAN_NEG, "clip": ["2", 0]}},
+        "7": {"class_type": "LoadImage", "inputs": {"image": image_name}},
+        "8": {"class_type": "Wan22ImageToVideoLatent", "inputs": {"vae": ["3", 0], "width": w, "height": h, "length": length, "batch_size": 1, "start_image": ["7", 0]}},
+        "9": {"class_type": "KSampler", "inputs": {"model": ["4", 0], "positive": ["5", 0], "negative": ["6", 0], "latent_image": ["8", 0],
+                                                    "seed": seed, "steps": steps, "cfg": cfg, "sampler_name": "uni_pc", "scheduler": "simple", "denoise": 1.0}},
+        "10": {"class_type": "VAEDecode", "inputs": {"samples": ["9", 0], "vae": ["3", 0]}},
+        "11": {"class_type": "CreateVideo", "inputs": {"images": ["10", 0], "fps": 24.0}},
+        "12": {"class_type": "SaveVideo", "inputs": {"video": ["11", 0], "filename_prefix": "video/stf", "format": "mp4", "codec": "h264"}},
+    }
+
+
 def call(path, data=None):
     req = urllib.request.Request(SERVER + path, data=json.dumps(data).encode() if data else None, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=60) as r:
@@ -109,7 +131,7 @@ def run(wf, dest):
             break
         time.sleep(2)
     for out in hist[pid]["outputs"].values():
-        for img in out.get("images", []):
+        for img in out.get("images", []) + out.get("videos", []) + out.get("gifs", []):
             q = urllib.parse.urlencode({"filename": img["filename"], "subfolder": img["subfolder"], "type": img["type"]})
             with open(dest, "wb") as f:
                 f.write(call(f"/view?{q}"))
@@ -124,6 +146,10 @@ def main():
     ap.add_argument("-m", choices=list(MODELS), default="zimage-hq")
     ap.add_argument("--size", default="832x1472", help="WxH; 832x1472 fits a 32 GB Mac comfortably, 1088x1920 is full reel size (needs lots of free RAM)")
     ap.add_argument("--shots", metavar="JSON", help="render an episode shot list, e.g. shots/ep01.json")
+    ap.add_argument("--animate", action="store_true", help="with --shots: turn each painted shot into a moving clip (Wan 2.2 5B)")
+    ap.add_argument("--frames", type=int, default=121, help="clip length in frames at 24 fps (121 = 5 s)")
+    ap.add_argument("--vsize", default="544x960", help="clip size WxH (multiples of 32)")
+    ap.add_argument("--vsteps", type=int, default=20)
     ap.add_argument("--only", default="", help="with --shots: shot numbers, e.g. 1-4 or 2,5")
     ap.add_argument("--refine", metavar="PNG", help="refine a chosen draft with the full model (keeps the face); use with one character id")
     ap.add_argument("--steps", type=int, default=20, help="refine steps (14-20 fits one 30-min run on an M1 Pro)")
@@ -144,6 +170,21 @@ def main():
             lo, _, hi = part.partition("-"); pick.update(range(int(lo), int(hi or lo) + 1))
         outdir = os.path.join(HERE, "shots-out", sp["episode"]); os.makedirs(outdir, exist_ok=True)
         st = a.style if a.style != "all" else "anime"
+        if a.animate:
+            import shutil
+            inp = os.path.join(os.environ.get("STF_AI_DIR", os.path.expanduser("~/claude-projects/2-strangers/ai-studio")), "ComfyUI", "input")
+            os.makedirs(inp, exist_ok=True)
+            vw, vh = (int(v) for v in a.vsize.lower().split("x"))
+            vdir = os.path.join(HERE, "clips-out", sp["episode"]); os.makedirs(vdir, exist_ok=True)
+            for i, shot in enumerate(sp["shots"], 1):
+                if pick and i not in pick:
+                    continue
+                src = os.path.join(HERE, "..", "studio", "data", "media", "shots", sp["episode"], shot["id"] + ".png")
+                name = f"stf_{sp['episode']}_{shot['id']}.png"; shutil.copy(src, os.path.join(inp, name))
+                seed = random.randint(1, 2**31); dest = os.path.join(vdir, f"{shot['id']}.mp4"); t = time.time()
+                run(wan_i2v_workflow(name, shot.get("motion", "subtle natural motion, blinking, breathing, gentle breeze") + ". Anime style, consistent characters, smooth natural motion", seed, vw, vh, a.frames, a.vsteps), dest)
+                print(f"{os.path.relpath(dest, HERE)}  ({time.time() - t:.0f}s)", flush=True)
+            return
         for i, shot in enumerate(sp["shots"], 1):
             if pick and i not in pick:
                 continue
